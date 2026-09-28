@@ -1,0 +1,50 @@
+services:
+  - type: pserv
+    name: applied-ai-backend
+    runtime: python
+    region: singapore
+    plan: 0.5c-512mb
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    preDeployCommand: python manage.py init-schema
+    startCommand: uvicorn main:app --host 0.0.0.0 --port "$PORT" --no-proxy-headers
+    autoDeployTrigger: off
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.14
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: applied-ai-db
+          property: connectionString
+
+  - type: web
+    name: applied-ai-frontend
+    runtime: node
+    region: singapore
+    plan: 0.5c-512mb
+    rootDir: frontend
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: API_BASE_URL="http://$BACKEND_HOSTPORT" node node_modules/next/dist/bin/next start --hostname 0.0.0.0 --port "$PORT"
+    healthCheckPath: /student/login
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_HOSTPORT
+        fromService:
+          name: applied-ai-backend
+          type: pserv
+          property: hostport
+
+databases:
+  - name: applied-ai-db
+    region: singapore
+    plan: 0.1c-256mb
+    diskSizeGB: 1
+    databaseName: applied_ai
+    user: applied_ai
+    ipAllowList: []

@@ -32,6 +32,11 @@ def initialize_database() -> None:
                 connection.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
             except psycopg.errors.DuplicateDatabase:
                 pass
+    initialize_schema()
+    print("Database applied-ai is ready. Existing data was preserved.")
+
+
+def initialize_schema() -> None:
     with connect_database() as connection:
         connection.execute(
             """
@@ -47,7 +52,7 @@ def initialize_database() -> None:
         initialize_student_tables(connection)
         initialize_faculty_tables(connection)
         initialize_student_auth_tables(connection)
-    print("Database applied-ai and admins table are ready. Existing data was preserved.")
+    print("Database tables are ready. Existing data was preserved.")
 
 
 def normalize_email(value: str) -> str:
@@ -83,11 +88,13 @@ def create_admin() -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Applied AI database and admin setup")
-    parser.add_argument("command", choices=("init", "create-admin"))
+    parser.add_argument("command", choices=("init", "init-schema", "create-admin"))
     arguments = parser.parse_args()
     try:
         if arguments.command == "init":
             initialize_database()
+        elif arguments.command == "init-schema":
+            initialize_schema()
         else:
             create_admin()
     except psycopg.errors.UniqueViolation:

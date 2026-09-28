@@ -2,6 +2,13 @@
 
 Last updated: 2026-09-28
 
+## Render Blueprint
+
+- Added repository-root render.yaml for a public Next.js frontend, private FastAPI backend and private PostgreSQL. Defaults: Singapore, paid 0.5c-512mb services and 0.1c-256mb database with 1 GB storage. Automatic deploys disabled; user reviews plans/cost and deploys manually.
+- Backend pre-deploy runs new manage.py init-schema against Render's existing database. Local init retained; no database creation permissions required by init-schema, no credentials/accounts seeded. Frontend private API URL is assembled at startup; Render injects the database URL. Added RENDER.md with one-time admin provisioning and launch checks.
+- Validation: mocked schema CLI checks passed without touching a database; YAML parsing and service/database references, directories, ports, regions and privacy checks passed using existing js-yaml. Editor diagnostics clear. Initial YAML check used an unavailable parser, then corrected to the installed parser without adding dependencies.
+- Blueprint publication: render.yaml, RENDER.md and the required backend schema-only command are included together at the repository root on main for Render discovery. No Render login, resource creation, deployment or production build performed. Shared proxy-IP authentication throttling and hosted authentication/progress checks remain outstanding; documented in RENDER.md. User explicitly handles Render deployment.
+
 ## Repository Setup
 
 - Initialized this course directory as a Git repository on main, connected to https://github.com/Zyora-Dev/applied.git. Remote was empty before initialization. Repository root contains frontend/, backend/ and course materials.
