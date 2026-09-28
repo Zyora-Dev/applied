@@ -59,6 +59,28 @@ def normalize_email(value: str) -> str:
     return validate_email(value.strip(), check_deliverability=False).normalized.lower()
 
 
+def database_connection_error_hint(error: psycopg.OperationalError) -> str:
+    message = str(error).lower()
+    if any(text in message for text in (
+        "could not translate host name", "failed to resolve host",
+        "name or service not known", "nodename nor servname",
+    )):
+        return "Database hostname could not be resolved. Check the internal DATABASE_URL and matching Render regions."
+    if "password authentication failed" in message or error.sqlstate == "28P01":
+        return "Database authentication failed. Check DATABASE_URL against the database's current internal connection URL."
+    if "no password supplied" in message:
+        return "Database password is missing from the connection configuration."
+    if error.sqlstate == "3D000" or ("database" in message and "does not exist" in message):
+        return "The configured database does not exist. Use Render's generated internal connection URL."
+    if "timeout" in message or "timed out" in message:
+        return "Database connection timed out. Check database readiness, private networking and matching regions."
+    if "connection refused" in message:
+        return "Database connection was refused. Check database readiness and the configured host/port."
+    if "ssl" in message or "tls" in message:
+        return "Database TLS negotiation failed. Check the connection URL's SSL settings."
+    return "Database connection or operation failed. Check database events and availability; the raw error is withheld to protect credentials."
+
+
 def create_admin() -> None:
     configured_email = os.environ.get("ADMIN_EMAIL", "").strip()
     configured_password = os.environ.get("ADMIN_PASSWORD", "")
@@ -102,6 +124,9 @@ def main() -> int:
         return 1
     except (EmailNotValidError, ValueError) as error:
         print(str(error), file=sys.stderr)
+        return 1
+    except psycopg.OperationalError as error:
+        print(f"Database setup failed: {database_connection_error_hint(error)}", file=sys.stderr)
         return 1
     except psycopg.Error as error:
         print(
