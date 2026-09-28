@@ -15,6 +15,12 @@ The frontend uses the backend's generated private host/port; the database connec
 is injected by Render. No credentials or fixed public URLs belong in this file.
 Only the frontend needs a public URL or custom domain. The backend is not public.
 
+The frontend's same-origin check uses Render's automatic `RENDER_EXTERNAL_URL`,
+not the proxy-internal request URL. For a custom domain, set frontend `APP_ORIGIN`
+to its full public origin (for example, `https://training.example.com`); this
+overrides the Render hostname. No forwarded headers are trusted for this check.
+Without either variable, local development compares against the request origin.
+
 ## Database And Admin
 
 The backend pre-deploy command runs `python manage.py init-schema` against the

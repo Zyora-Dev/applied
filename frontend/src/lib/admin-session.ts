@@ -11,7 +11,15 @@ export function privateJson(body: unknown, status = 200) {
 }
 
 export function sameOrigin(request: NextRequest) {
-  return request.headers.get("origin") === request.nextUrl.origin;
+  const publicUrl = process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL;
+  if (!publicUrl) return request.headers.get("origin") === request.nextUrl.origin;
+  try {
+    const expected = new URL(publicUrl);
+    if (expected.protocol !== "https:" && expected.protocol !== "http:") return false;
+    return request.headers.get("origin") === expected.origin;
+  } catch {
+    return false;
+  }
 }
 
 export async function backendRequest(path: string, init: RequestInit = {}) {
