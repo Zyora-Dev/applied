@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arunachala Hitech Engineering College | One-Month Applied AI Course</title>
+<style>
+  :root { --ink: #182b2a; --teal: #096b61; --accent: #ac492e; --soft: #edf5f2; --line: #cddbd6; --secondary: #455754; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e4e9e6; color: var(--ink); font: 10pt/1.44 Helvetica, Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 210mm; height: 297mm; padding: 17mm 18mm 20mm; margin: 8mm auto; background: white; position: relative; break-after: page; }
+  .page:last-child { break-after: auto; }
+  .running { display: flex; justify-content: space-between; gap: 8mm; padding-bottom: 4mm; border-bottom: 1px solid var(--line); font-size: 8pt; font-weight: 700; color: var(--teal); }
+  .eyebrow { color: var(--accent); font-size: 9pt; font-weight: 700; text-transform: uppercase; margin: 7mm 0 2mm; }
+  h1, h2, h3, p { margin-top: 0; }
+  h1, h2 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; line-height: 1.13; }
+  h1 { font-size: 33pt; margin-bottom: 5mm; }
+  h2 { font-size: 25pt; margin: 6mm 0 3mm; }
+  h3 { font-size: 11pt; line-height: 1.3; margin-bottom: 2mm; }
+  p { margin-bottom: 3mm; }
+  .lead { font-size: 12pt; line-height: 1.5; }
+  .title-lockup { display: flex; align-items: center; justify-content: space-between; gap: 6mm; }
+  .course-emblem { flex: 0 0 26mm; text-align: center; color: var(--teal); }
+  .course-emblem svg { width: 24mm; height: 24mm; display: block; margin: 0 auto 1mm; }
+  .course-emblem span { font-size: 7pt; font-weight: 700; }
+  .journey { margin: 4mm 0; padding: 3mm 0; border-top: 2px solid var(--teal); border-bottom: 1px solid var(--line); }
+  .journey-track { list-style: none; padding: 0; margin: 2mm 0 3mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5mm; }
+  .journey-track li { position: relative; margin: 0; padding: 0; }
+  .journey-track li:not(:last-child)::after { content: ''; position: absolute; right: -2mm; top: 4mm; width: 2mm; height: 2mm; border-top: 1.5px solid var(--teal); border-right: 1.5px solid var(--teal); transform: rotate(45deg); }
+  .journey-track span { color: var(--accent); display: block; font-size: 8pt; font-weight: 700; }
+  .journey-track strong { display: block; font-size: 10pt; margin: 1mm 0; }
+  .journey-track small { display: block; font-size: 8pt; }
+  .journey p { font-size: 8.7pt; margin: 0; }
+  .rag-diagram { margin: 2mm 0 3mm; }
+  .rag-diagram svg { display: block; width: 100%; height: auto; }
+  .rag-diagram figcaption { font-size: 8pt; color: var(--secondary); margin-top: 1mm; }
+  .subtitle { font-size: 11pt; color: var(--secondary); }
+  .band { background: var(--soft); border-left: 3px solid var(--teal); padding: 4mm 5mm; margin: 4mm 0; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4mm 0; margin: 5mm 0; }
+  .stats strong { display: block; color: var(--teal); font-size: 21pt; line-height: 1.1; margin-bottom: 1mm; }
+  .stats span { font-size: 9pt; }
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 7mm; margin: 4mm 0; }
+  ul, ol { margin: 1mm 0 3mm; padding-left: 5mm; }
+  li { padding-left: .5mm; margin-bottom: 1.6mm; }
+  .small { font-size: 8.7pt; }
+  .muted { color: var(--secondary); }
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0 4mm; font-size: 9pt; }
+  th { color: var(--teal); background: var(--soft); text-align: left; font-size: 8.5pt; }
+  th, td { padding: 2mm 2.5mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .session { border-top: 1px solid var(--line); padding-top: 2.8mm; margin-top: 3mm; }
+  .session h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; }
+  .session h3 span { white-space: nowrap; color: var(--teal); font-size: 8.2pt; font-weight: 400; }
+  .session p { margin-bottom: 1.7mm; font-size: 9.4pt; line-height: 1.38; }
+  .timing { color: var(--accent); font-size: 8.3pt !important; font-weight: 700; }
+  .week { color: var(--teal); font-size: 10pt; font-weight: 700; margin: 4mm 0 1mm; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid var(--teal); margin: 4mm 0; gap: 4mm; padding-top: 3mm; }
+  .flow strong { display: block; font-size: 9.2pt; margin-bottom: 1mm; }
+  .flow p { font-size: 8.6pt; }
+  .footer { position: absolute; left: 18mm; right: 18mm; bottom: 10mm; display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 3mm; font-size: 8pt; color: var(--secondary); }
+  a { color: var(--teal); text-decoration: none; overflow-wrap: anywhere; }
+  .checklist li { margin-bottom: 2mm; }
+  @page { size: A4; margin: 0; }
+  @media print { body { background: white; } .page { margin: 0; } }
+</style>
+</head>
+<body>
+
+<section class="page">
+  <header class="running"><span>ARUNACHALA HITECH ENGINEERING COLLEGE</span><span>COURSE PROPOSAL</span></header>
+  <main>
+    <p class="eyebrow">Third-Year Engineering Students / One Month</p>
+    <div class="title-lockup">
+      <h1>Applied AI:<br>From Data to RAG</h1>
+      <div class="course-emblem">
+        <svg viewBox="0 0 100 100" role="img" aria-label="Applied AI course emblem, not an institutional logo">
+          <rect x="14" y="14" width="72" height="72" rx="8" fill="#edf5f2" stroke="#096b61" stroke-width="2"/>
+          <g stroke="#096b61" stroke-width="2"><path d="M30 14V5M50 14V5M70 14V5M30 86V95M50 86V95M70 86V95M14 30H5M14 50H5M14 70H5M86 30H95M86 50H95M86 70H95"/></g>
+          <text x="50" y="61" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#096b61">AI</text>
+          <circle cx="76" cy="24" r="4" fill="#ac492e"/>
+        </svg>
+        <span>APPLIED AI COURSE</span>
+      </div>
+    </div>
+    <p class="lead">A practical introduction to PyTorch, dataset validation, Transformers, Hugging Face and Retrieval-Augmented Generation.</p>
+    <div class="stats"><div><strong>4</strong><span>Teaching weeks</span></div><div><strong>8</strong><span>Guided sessions</span></div><div><strong>16</strong><span>Contact hours</span></div></div>
+    <p class="subtitle"><strong>Monday:</strong> 2 hours offline at college<br><strong>Friday or Saturday:</strong> 2 hours on Google Meet each week</p>
+    <div class="band"><h3>Course Purpose</h3><p style="margin-bottom:0">Help students move from understanding data and neural networks to building a small, working AI application. Every week combines essential theory, guided coding and progress towards a team project.</p></div>
+    <h3>Scope of the Course</h3>
+    <ul>
+      <li><strong>PyTorch foundations:</strong> tensors, automatic differentiation, datasets, data loaders and a basic neural-network training loop.</li>
+      <li><strong>Dataset validation:</strong> schema checks, missing values, duplicates, class balance, leakage prevention and trustworthy evaluation splits.</li>
+      <li><strong>Transformers and Hugging Face:</strong> tokenization, attention concepts, pretrained model inference and model/dataset cards.</li>
+      <li><strong>RAG:</strong> document preparation, embeddings, retrieval, grounded answers, source citations and basic evaluation.</li>
+    </ul>
+    <div class="columns">
+      <div><h3>Expected Level</h3><p class="small">Introductory and application-oriented. Suitable for students across engineering departments who have basic Python knowledge.</p></div>
+      <div><h3>Outside This Month</h3><p class="small">Training large language models from scratch, advanced fine-tuning, distributed training and production-scale deployment.</p></div>
+    </div>
+    <p class="small muted"><strong>Planning assumption:</strong> four teaching weeks, with one online session per week. Exact dates, timings and the Friday/Saturday choice will be confirmed with the college.</p>
+  </main>
+  <footer class="footer"><span>Applied AI / Course Scope</span><span>01 / 06</span></footer>
+</section>
+
+<section class="page">
+  <header class="running"><span>APPLIED AI / ONE-MONTH ROADMAP</span><span>DELIVERY &amp; PREPARATION</span></header>
+  <main>
+    <h2>How the Month Works</h2>
+    <p class="subtitle">A progressive sequence: validate data, train a small model, use pretrained models, then build a grounded assistant.</p>
+    <table>
+      <thead><tr><th>Week</th><th>Monday / Offline / 2 hours</th><th>Friday or Saturday / Meet / 2 hours</th></tr></thead>
+      <tbody>
+        <tr><td><strong>01</strong></td><td>Dataset quality and validation</td><td>PyTorch tensors and training basics</td></tr>
+        <tr><td><strong>02</strong></td><td>Train and evaluate a small classifier</td><td>Transformers and Hugging Face</td></tr>
+        <tr><td><strong>03</strong></td><td>RAG architecture and document indexing</td><td>Retrieval, answer generation and citations</td></tr>
+        <tr><td><strong>04</strong></td><td>Project clinic, evaluation and improvements</td><td>Final demonstrations and assessment</td></tr>
+      </tbody>
+    </table>
+    <div class="columns">
+      <div>
+        <h3>Before the First Session</h3>
+        <ul class="small">
+          <li>Python: variables, loops, functions, lists and dictionaries.</li>
+          <li>Basic familiarity with tables, averages, vectors and matrices.</li>
+          <li>A short Python readiness exercise; preparatory material for students needing a refresher.</li>
+          <li>No prior deep-learning experience required.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Student Setup</h3>
+        <ul class="small">
+          <li>Laptop, browser, internet and a Google account for Meet and Colab.</li>
+          <li>Google Colab as the common notebook environment; local Jupyter is optional.</li>
+          <li>Hugging Face account if required for selected resources.</li>
+          <li>No dedicated GPU purchase required for the planned introductory labs.</li>
+        </ul>
+      </div>
+    </div>
+    <h3>Teaching and Practice Model</h3>
+    <p><strong>Offline:</strong> concepts, live demonstrations, paired coding and in-person troubleshooting. <strong>Online:</strong> short recaps, live notebook exercises, screen-sharing support and project reviews.</p>
+    <p><strong>Between sessions:</strong> approximately 2-3 hours of student practice each week, additional to the 16 contact hours. Total expected effort is approximately <strong>24-28 hours</strong>.</p>
+    <figure class="journey" aria-label="Four-week learning progression">
+      <h3>The Learning Journey</h3>
+      <ol class="journey-track">
+        <li><span>WEEK 01</span><strong>Understand Data</strong><small>Validate data + learn tensors</small></li>
+        <li><span>WEEK 02</span><strong>Work with Models</strong><small>Train + use Transformers</small></li>
+        <li><span>WEEK 03</span><strong>Build with RAG</strong><small>Retrieve + generate answers</small></li>
+        <li><span>WEEK 04</span><strong>Evaluate &amp; Present</strong><small>Measure + improve + demo</small></li>
+      </ol>
+      <p>PyTorch labs use tabular data; the RAG project uses approved technical documents and pretrained models. Students do not train the RAG language model.</p>
+    </figure>
+    <h3>Trainer and College Preparation</h3>
+    <p class="small">Provide tested starter notebooks, datasets, sample documents and evaluation questions before class. Arrange a projector, power outlets, dependable connectivity and the Meet link. Pre-download small model assets where feasible and prepare saved example outputs for connectivity interruptions.</p>
+    <p class="small muted"><strong>Compute and cost:</strong> use small, publicly accessible models and datasets. Free cloud GPU availability is not guaranteed. Any paid API use requires prior approval; it is not a student prerequisite.</p>
+  </main>
+  <footer class="footer"><span>Applied AI / Delivery Plan</span><span>02 / 06</span></footer>
+</section>
+
+<section class="page">
+  <header class="running"><span>APPLIED AI / ONE-MONTH ROADMAP</span><span>WEEKS 01 &amp; 02</span></header>
+  <main>
+    <h2>Foundations to Pretrained Models</h2>
+    <p class="subtitle">Four sessions that establish reliable data handling and the core model workflow.</p>
+    <p class="week">WEEK 01 / DATA QUALITY &amp; PYTORCH</p>
+    <article class="session">
+      <h3>01 / Validate Before You Train <span>Monday / Offline</span></h3>
+      <p><strong>Theory:</strong> AI/ML workflow; features and labels; missing values, types, ranges, duplicates, imbalance and train/validation/test separation.</p>
+      <p><strong>Practical:</strong> inspect a small dataset with pandas; add validation assertions; remove leakage risks; split data before fitting preprocessing.</p>
+      <p><strong>Output:</strong> a dataset-quality checklist, validation notebook and reproducible split. Keep the test set untouched during model selection.</p>
+      <p class="timing">10 min readiness + 30 min theory + 60 min lab + 20 min review = 120 min</p>
+    </article>
+    <article class="session">
+      <h3>02 / Understand PyTorch Building Blocks <span>Friday/Saturday / Meet</span></h3>
+      <p><strong>Theory:</strong> tensors, shapes, devices, gradients, loss functions and optimizers; how a training step changes model parameters.</p>
+      <p><strong>Practical:</strong> create tensors, inspect gradients and use Dataset/DataLoader; run a tiny neural network with a supplied starter notebook.</p>
+      <p><strong>Output:</strong> a working forward/backward pass and a short explanation of the training loop. Practice: complete and rerun the notebook.</p>
+      <p class="timing">10 min recap + 30 min theory + 65 min lab + 15 min checkpoint = 120 min</p>
+    </article>
+    <p class="week">WEEK 02 / EVALUATION &amp; TRANSFORMERS</p>
+    <article class="session">
+      <h3>03 / Train, Measure and Improve <span>Monday / Offline</span></h3>
+      <p><strong>Theory:</strong> epochs, batches, overfitting, evaluation mode, accuracy, precision, recall and F1; why accuracy alone can mislead.</p>
+      <p><strong>Practical:</strong> train a small classifier on validated data; compare with a simple baseline; inspect loss and a confusion matrix; save model weights.</p>
+      <p><strong>Output:</strong> baseline comparison, validation metrics and error examples. Choose the model using validation data, then report the held-out test result.</p>
+      <p class="timing">15 min review + 25 min theory + 65 min lab + 15 min discussion = 120 min</p>
+    </article>
+    <article class="session">
+      <h3>04 / Use Transformers with Hugging Face <span>Friday/Saturday / Meet</span></h3>
+      <p><strong>Theory:</strong> tokens, embeddings, attention intuition, context limits and encoder/decoder roles; pretrained inference versus fine-tuning.</p>
+      <p><strong>Practical:</strong> inspect a model card and license; load a tokenizer and small pretrained model through Transformers; run a text task and inspect failures.</p>
+      <p><strong>Output:</strong> an inference notebook, model-choice note and capstone team/topic. Practice: collect approved project documents and draft questions.</p>
+      <p class="timing">10 min recap + 35 min theory + 60 min lab + 15 min project brief = 120 min</p>
+    </article>
+  </main>
+  <footer class="footer"><span>Applied AI / Detailed Session Roadmap</span><span>03 / 06</span></footer>
+</section>
+
+<section class="page">
+  <header class="running"><span>APPLIED AI / ONE-MONTH ROADMAP</span><span>WEEKS 03 &amp; 04</span></header>
+  <main>
+    <h2>Build, Evaluate and Demonstrate</h2>
+    <p class="subtitle">Apply pretrained models to a small, traceable document-question-answering system.</p>
+    <p class="week">WEEK 03 / RETRIEVAL-AUGMENTED GENERATION</p>
+    <article class="session">
+      <h3>05 / Prepare Documents and Build Retrieval <span>Monday / Offline</span></h3>
+      <p><strong>Theory:</strong> why RAG is useful; documents, chunks, embeddings, similarity and top-k retrieval; RAG versus model training.</p>
+      <p><strong>Practical:</strong> extract text from approved text-based documents; retain source/page metadata; split into chunks; embed and index them.</p>
+      <p><strong>Output:</strong> a searchable document collection with source-linked results. Begin with a small in-memory index; FAISS is an optional extension.</p>
+      <p class="timing">10 min recap + 30 min theory + 65 min lab + 15 min checkpoint = 120 min</p>
+    </article>
+    <article class="session">
+      <h3>06 / Generate Grounded Answers <span>Friday/Saturday / Meet</span></h3>
+      <p><strong>Theory:</strong> retrieved context, prompt structure, grounded answers, hallucinations and the difference between a citation and supporting evidence.</p>
+      <p><strong>Practical:</strong> connect retrieval to a small instruction model; show source references; test missing-information questions and an explicit abstention response.</p>
+      <p><strong>Output:</strong> end-to-end RAG notebook. Practice: test ten questions and log incorrect retrieval, unsupported claims and weak citations separately.</p>
+      <p class="timing">10 min recap + 25 min theory + 65 min lab + 20 min project review = 120 min</p>
+    </article>
+    <p class="week">WEEK 04 / PROJECT QUALITY &amp; PRESENTATION</p>
+    <article class="session">
+      <h3>07 / Project Clinic and Evaluation <span>Monday / Offline</span></h3>
+      <p><strong>Theory:</strong> retrieval hit rate, answer correctness, evidence support, citation quality and response time; document privacy and prompt-injection risks.</p>
+      <p><strong>Practical:</strong> run the fixed evaluation set; compare one chunk-size or top-k change; inspect failures; verify citations and missing-answer handling.</p>
+      <p><strong>Output:</strong> a before/after evaluation table, corrected issues and a rehearsed demo. Keep a small question subset unseen until final assessment.</p>
+      <p class="timing">15 min review + 20 min evaluation briefing + 70 min clinic + 15 min rehearsal = 120 min</p>
+    </article>
+    <article class="session">
+      <h3>08 / Final Project Showcase <span>Friday/Saturday / Meet</span></h3>
+      <p><strong>Demonstration:</strong> explain the problem, data checks and RAG flow; show an answer with evidence, an unsupported question and one failure case.</p>
+      <p><strong>Assessment:</strong> team demonstration, individual viva, evaluation results and feedback. Students explain limitations and their own contribution.</p>
+      <p><strong>Output:</strong> final notebook, report, slides and completed assessment rubric.</p>
+      <p class="timing">10 min setup + 80 min demos/viva + 20 min feedback + 10 min next steps = 120 min</p>
+    </article>
+    <p class="small muted" style="margin-top:4mm"><strong>Showcase capacity:</strong> the plan accommodates up to eight teams at ten minutes each, including viva. For a larger cohort, arrange parallel assessors or an additional assessment slot before the course begins.</p>
+  </main>
+  <footer class="footer"><span>Applied AI / Detailed Session Roadmap</span><span>04 / 06</span></footer>
+</section>
+
+<section class="page">
+  <header class="running"><span>APPLIED AI / ONE-MONTH ROADMAP</span><span>CAPSTONE PROJECT</span></header>
+  <main>
+    <h2>A Technical Knowledge Assistant</h2>
+    <p class="subtitle">Build a small RAG assistant that answers questions from a verified collection of engineering documents and identifies its sources.</p>
+    <div class="band"><h3>Recommended Project Brief</h3><p style="margin-bottom:0">Teams of 3-4 students use approved lab manuals, equipment guides or technical notes: 5-10 short documents or about 20-50 text-based pages. Scanned-document OCR is outside the core project.</p></div>
+    <h3>How the RAG Assistant Works</h3>
+    <figure class="rag-diagram">
+      <svg viewBox="0 0 660 142" role="img" aria-labelledby="rag-title rag-description">
+        <title id="rag-title">RAG: document indexing and question answering</title>
+        <desc id="rag-description">First validate and chunk documents, embed the chunks and store them in a vector index. For each question, embed the query and search that index, send retrieved context with the question to the language model, and produce an answer with sources.</desc>
+        <defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="#096b61"/></marker></defs>
+        <g font-family="Helvetica, Arial, sans-serif">
+          <g font-size="10" font-weight="700" fill="#ac492e"><text x="0" y="11">PREPARE ONCE / DOCUMENT INDEXING</text><text x="0" y="86">AT QUESTION TIME / RETRIEVAL + GENERATION</text></g>
+          <g fill="#edf5f2" stroke="#cddbd6"><rect x="0.5" y="20" width="143" height="36" rx="4"/><rect x="172" y="20" width="143" height="36" rx="4"/><rect x="344" y="20" width="143" height="36" rx="4"/><rect x="516" y="20" width="143" height="36" rx="4"/><rect x="0.5" y="95" width="143" height="36" rx="4"/><rect x="172" y="95" width="143" height="36" rx="4"/><rect x="344" y="95" width="143" height="36" rx="4"/></g>
+          <rect x="516" y="95" width="143" height="36" rx="4" fill="#096b61"/>
+          <g fill="none" stroke="#096b61" stroke-width="1.6" marker-end="url(#arrow)"><path d="M145 38H167"/><path d="M317 38H339"/><path d="M489 38H511"/><path d="M145 113H167"/><path d="M317 113H339"/><path d="M489 113H511"/><path d="M588 56V68H244V76M244 90V94"/></g>
+          <g fill="#182b2a" text-anchor="middle" font-size="12" font-weight="700"><text x="72" y="35">Documents</text><text x="244" y="35">Clean + Chunk</text><text x="416" y="35">Embed Chunks</text><text x="588" y="35">Vector Index</text><text x="72" y="110">Student Question</text><text x="244" y="110">Embed + Search</text><text x="416" y="110">Context + LLM</text></g>
+          <g fill="#455754" text-anchor="middle" font-size="10"><text x="72" y="48">Approved source files</text><text x="244" y="48">Validate; keep source IDs</text><text x="416" y="48">Text to numeric vectors</text><text x="588" y="48">Store vectors + sources</text><text x="72" y="123">Include in model prompt</text><text x="244" y="123">Retrieve top-k passages</text><text x="416" y="123">Question + evidence</text></g>
+          <text x="588" y="110" text-anchor="middle" font-size="12" font-weight="700" fill="white">Answer + Sources</text><text x="588" y="123" text-anchor="middle" font-size="10" fill="white">Abstain without evidence</text>
+        </g>
+      </svg>
+      <figcaption>Use the same embedding model for documents and questions. Evaluate retrieval, evidence support and citations.</figcaption>
+    </figure>
+    <h3>Required Features</h3>
+    <ul class="checklist">
+      <li><strong>Data validation:</strong> detect empty or duplicate text, confirm readable extraction and record document permissions and source information.</li>
+      <li><strong>Traceable retrieval:</strong> display the retrieved passages and retain document/page or section references.</li>
+      <li><strong>Grounded responses:</strong> provide an answer with supporting citations and say when the supplied documents do not contain enough information.</li>
+      <li><strong>Evaluation:</strong> use ten documented questions: six factual, two requiring multiple passages and two unanswerable from the collection.</li>
+      <li><strong>Reproducibility:</strong> record model IDs, package versions and settings; provide clear notebook execution steps. A web interface is optional.</li>
+    </ul>
+    <table>
+      <thead><tr><th>Milestone</th><th>Team Submission</th></tr></thead>
+      <tbody>
+        <tr><td>End of Week 2</td><td>Problem statement, approved documents, team roles and draft questions.</td></tr>
+        <tr><td>End of Week 3</td><td>Working RAG notebook, ten-question set and initial failure log.</td></tr>
+        <tr><td>End of Week 4</td><td>Final notebook, source manifest, evaluation table, 2-3 page report and 5-slide demonstration.</td></tr>
+      </tbody>
+    </table>
+    <h3>Responsible Use and Boundaries</h3>
+    <p class="small">Use public or college-approved content only. Do not upload student records, personal data, confidential documents or API keys. Check model and dataset licenses. Treat document instructions as untrusted input and test for prompt injection; prompting alone is not a security guarantee. The assistant is a learning prototype, not an authority for safety-critical engineering decisions.</p>
+    <p class="small muted"><strong>Team accountability:</strong> divide data preparation, retrieval, answer generation and evaluation tasks, but require each member to explain the full pipeline.</p>
+  </main>
+  <footer class="footer"><span>Applied AI / Project Scope &amp; Deliverables</span><span>05 / 06</span></footer>
+</section>
+
+<section class="page">
+  <header class="running"><span>APPLIED AI / ONE-MONTH ROADMAP</span><span>ASSESSMENT &amp; OUTCOMES</span></header>
+  <main>
+    <h2>What Students Take Away</h2>
+    <h3>Observable Learning Outcomes</h3>
+    <ol class="small">
+      <li>Validate a dataset and explain how leakage compromises evaluation.</li>
+      <li>Build and evaluate a small neural network using PyTorch.</li>
+      <li>Explain tokenization and attention at an introductory level; run a pretrained Hugging Face model.</li>
+      <li>Implement a document-to-answer RAG workflow with traceable sources.</li>
+      <li>Evaluate retrieval and answers, report failures and demonstrate responsible data use.</li>
+    </ol>
+    <h3>Proposed Assessment / 100 Marks</h3>
+    <table>
+      <thead><tr><th>Component</th><th>Marks</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Individual practical work</td><td>30</td><td>Data validation (10), PyTorch (10), Hugging Face inference (10).</td></tr>
+        <tr><td>Individual concept checks / viva</td><td>20</td><td>Data splits, training loop, Transformers, RAG and limitations.</td></tr>
+        <tr><td>Team capstone</td><td>40</td><td>Data quality (10), working pipeline (15), evaluation and grounding (15).</td></tr>
+        <tr><td>Demonstration and documentation</td><td>10</td><td>Clarity, reproducibility and explanation of contributions.</td></tr>
+      </tbody>
+    </table>
+    <p class="small"><strong>Suggested completion standard:</strong> attend at least 6 of 8 sessions, submit the required individual labs and project, and score at least 60/100. Attendance, certification and grading policy remain subject to college approval.</p>
+    <h3>Simple RAG Evaluation Scorecard</h3>
+    <p class="small">For the eight answerable questions, report retrieval hit rate at a fixed top-k: questions with a relevant passage retrieved / 8. Separately review answer correctness, whether each material claim is supported, and whether citations point to the correct evidence. For the two unanswerable questions, record correct abstentions / 2. Report response time and settings. A ten-question test is instructional evidence, not a production-quality benchmark.</p>
+    <div class="band"><h3>Academic and Career Scope</h3><p class="small" style="margin-bottom:0">The course provides a foundation for department mini-projects, final-year project exploration and further AI/ML learning. Students finish with practical notebooks and a demonstrable prototype. One month does not establish professional AI-engineering proficiency or guarantee internship or placement outcomes.</p></div>
+    <div class="band">
+      <h3>Resource Materials &amp; Course-Tracking Console</h3>
+      <p class="small">Resource materials will be provided as part of the course.</p>
+      <p class="small" style="margin-bottom:0">A dedicated console will be provided for students and faculty to track course progress.</p>
+    </div>
+    <p class="small muted"><strong>After the course:</strong> deepen Python and statistics, expand the evaluation set, study fine-tuning fundamentals and improve the same project before attempting deployment.</p>
+  </main>
+  <footer class="footer"><span>Applied AI / Assessment &amp; Future Scope</span><span>06 / 06</span></footer>
+</section>
+
+</body>
+</html>

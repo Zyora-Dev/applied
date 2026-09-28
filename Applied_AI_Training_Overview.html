@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A twelve-slide landscape introduction to the four-week Applied AI training programme.">
+  <title>Applied AI | Four-Week Training Overview</title>
+  <style>
+    :root { color-scheme: light; --ink: #17221f; --paper: #f7faf8; --lime: #c5f277; --teal: #005f55; --coral: #a83726; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #252927; font-family: "Avenir Next", "Trebuchet MS", sans-serif; color: var(--ink); letter-spacing: 0; }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; opacity: .4; }
+    :focus-visible { outline: 3px solid #087fca; outline-offset: 4px; }
+    .viewport { margin: 24px auto; width: 1280px; }
+    .slide { width: 1280px; height: 720px; padding: 38px 60px 32px; background: var(--paper); position: relative; display: flex; flex-direction: column; margin-bottom: 24px; }
+    .slide[hidden] { display: none; }
+    .dark { --ink: #f7faf8; --paper: #101a17; color: var(--ink); background: var(--paper); }
+    .lime { --paper: #c5f277; background: var(--paper); }
+    .slide-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #71847a; padding-bottom: 14px; font-size: 13px; font-weight: 700; text-transform: uppercase; }
+    .slide-header .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark { width: 25px; height: 25px; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-size: 12px; }
+    .content { flex: 1; min-height: 0; padding-top: 29px; }
+    .eyebrow { font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--teal); margin: 0 0 8px; }
+    .dark .eyebrow { color: var(--lime); }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    h1 { font-size: 100px; line-height: 1; }
+    h2 { font-size: 46px; line-height: 1.12; margin-bottom: 12px; }
+    h3 { font-size: 21px; line-height: 1.25; margin-bottom: 10px; }
+    p, li { font-size: 19px; line-height: 1.4; }
+    .intro { font-size: 21px; max-width: 1100px; line-height: 1.4; }
+    .small { font-size: 17px; line-height: 1.5; }
+    .slide-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 15px; border-top: 1px solid #71847a; font-size: 13px; }
+    .folio { font-weight: 800; font-variant-numeric: tabular-nums; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-top: 18px; }
+    .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 32px; }
+    .rule { border-top: 3px solid var(--teal); padding-top: 12px; }
+    .rule p:not(.compare-label):not(.code-line):not(.small) { font-size: 18px; }
+    .dark .rule { border-color: var(--lime); }
+    .number { display: block; color: var(--teal); font-family: Georgia, serif; font-size: 48px; line-height: 1; margin-bottom: 18px; }
+    .dark .number { color: var(--lime); }
+    ul, ol { padding-left: 23px; margin: 12px 0 0; }
+    li { margin-bottom: 10px; padding-left: 3px; }
+    .takeaway { margin-top: 18px; padding: 12px 20px; border-left: 4px solid var(--teal); background: #e5eee8; color: #17221f; font-size: 18px; line-height: 1.4; }
+    .dark .takeaway { background: #243a2f; color: #fff; border-color: var(--lime); }
+    .cover .content { padding-top: 48px; background-image: radial-gradient(#536651 1px, transparent 1px); background-size: 24px 24px; background-position: right top; }
+    .cover h1 { margin: 22px 0; }
+    .cover .intro { max-width: 810px; background: var(--paper); }
+    .cover-strip { display: flex; gap: 52px; margin-top: 38px; }
+    .cover-strip strong { display: block; font-size: 27px; }
+    .cover-strip span { font-size: 16px; }
+    .cover .eyebrow, .cover h1 { width: fit-content; background: var(--paper); }
+    .weeks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-top: 32px; }
+    .week { border-top: 4px solid var(--teal); padding-top: 18px; }
+    .week:nth-child(2) { border-color: #a83726; }
+    .week:nth-child(3) { border-color: #426bba; }
+    .week:nth-child(4) { border-color: #576d23; }
+    .week-label { font-size: 15px; font-weight: 800; margin-bottom: 15px; }
+    .week h3 { font-size: 24px; min-height: 61px; }
+    .week p { font-size: 19px; }
+    .week .result { font-size: 16px; margin-top: 18px; padding-top: 15px; border-top: 1px solid #a9b9b0; }
+    .flow { display: flex; align-items: stretch; gap: 12px; margin-top: 20px; }
+    .step { flex: 1; padding: 16px; background: #e5eee8; border-top: 3px solid var(--teal); min-width: 0; }
+    .step strong { display: block; font-size: 21px; margin-bottom: 8px; }
+    .step span { font-size: 16px; line-height: 1.4; display: block; }
+    .arrow { align-self: center; font-size: 28px; font-weight: 700; }
+    .dark .step { background: #243a2f; border-color: var(--lime); }
+    .split-bar { display: grid; grid-template-columns: 7fr 1.5fr 1.5fr; margin-top: 23px; text-align: center; }
+    .split-bar div { padding: 18px 10px; background: #005f55; color: #fff; font-size: 19px; }
+    .split-bar div:nth-child(2) { background: #bfeae2; color: #17221f; }
+    .split-bar div:nth-child(3) { background: #f8d0c5; color: #17221f; }
+    .split-bar strong { display: block; margin-bottom: 4px; }
+    .caption { font-size: 16px; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 19px; }
+    caption { text-align: left; font-size: 16px; margin-bottom: 12px; font-weight: 700; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #a9b9b0; }
+    th { font-size: 16px; background: #e5eee8; }
+    .invalid { color: #9b2417; font-weight: 800; background: #fce8e1; }
+    .tensor { display: grid; grid-template-columns: repeat(4, 58px); gap: 6px; margin: 20px 0; }
+    .tensor span { background: var(--lime); color: #17221f; height: 46px; display: grid; place-items: center; font: 20px "Courier New", monospace; }
+    .code-line { font: 19px/1.7 "Courier New", monospace; padding: 20px 24px; background: #243a2f; color: #fff; margin-top: 20px; white-space: pre-wrap; }
+    .code-line b { color: var(--lime); font-weight: 400; }
+    .gpu-layout { display: grid; grid-template-columns: 520px 1fr; gap: 50px; margin-top: 25px; }
+    figure { margin: 0; }
+    canvas { width: 520px; height: 267px; display: block; background: #e5eee8; }
+    figcaption { font-size: 16px; line-height: 1.45; margin-top: 10px; }
+    .gpu-layout ul { margin-top: 0; }
+    .metric { border-top: 1px solid #a9b9b0; padding: 10px 0; display: grid; grid-template-columns: 135px 1fr; gap: 18px; }
+    .metric strong { font-size: 20px; }
+    .metric span { font-size: 17px; line-height: 1.4; }
+    .token-row { display: flex; gap: 9px; margin: 25px 0 18px; }
+    .token { font: 21px "Courier New", monospace; padding: 14px 21px; border: 1px solid #71847a; }
+    .token.highlight { background: var(--lime); color: #17221f; border-color: var(--lime); }
+    .attention { border-top: 3px solid var(--lime); padding-top: 15px; }
+    .attention p { font-size: 19px; }
+    .compare-label { font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; }
+    .dark .compare-label { color: var(--lime); }
+    .rag-row { display: grid; grid-template-columns: 140px 1fr; align-items: center; gap: 20px; margin-top: 17px; }
+    .rag-row > strong { font-size: 18px; color: var(--teal); }
+    .rag-row .flow { margin: 0; }
+    .rag-row .step { padding: 15px; }
+    .rag-row .step strong { font-size: 20px; margin-bottom: 5px; }
+    .evidence { margin-top: 23px; display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+    .evidence p { font-size: 19px; }
+    .evidence h3 { font-size: 21px; }
+    .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 45px; margin-top: 25px; }
+    .check-item { display: grid; grid-template-columns: 42px 1fr; gap: 14px; border-top: 1px solid #728562; padding-top: 18px; }
+    .check-item .index { font: 27px Georgia, serif; }
+    .check-item h3 { font-size: 22px; margin-bottom: 6px; }
+    .check-item p { font-size: 19px; }
+    .next-class { margin-top: 28px; border-top: 3px solid #17221f; padding-top: 20px; font-size: 24px; }
+    .toolbar { position: sticky; bottom: 0; display: none; justify-content: center; align-items: center; gap: 12px; padding: 12px; background: #101a17; color: #fff; border-top: 1px solid #71847a; z-index: 2; }
+    .toolbar button, .toolbar select { border: 1px solid #71847a; background: #243a2f; color: white; height: 40px; border-radius: 4px; }
+    .toolbar button { min-width: 42px; padding: 0 12px; font-size: 21px; }
+    .toolbar select { width: 260px; padding: 0 10px; font-size: 14px; }
+    .toolbar output { font-size: 14px; min-width: 45px; text-align: center; }
+    .toolbar .print { font-size: 14px; }
+    .ready .toolbar { display: flex; }
+    .ready .viewport { position: relative; }
+    .ready .deck { width: 1280px; height: 720px; transform-origin: top left; }
+    .ready .slide { margin: 0; }
+    .ready .slide:not([hidden]) .content { animation: reveal .2s ease-out; }
+    @keyframes reveal { from { opacity: 0; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .ready .slide:not([hidden]) .content { animation: none; } }
+    @media (max-width: 600px) { .toolbar { gap: 6px; padding: 10px 6px; flex-wrap: wrap; } .toolbar select { width: 165px; } .viewport { margin-top: 12px; margin-bottom: 12px; } }
+    @page { size: 338.6667mm 190.5mm; margin: 0; }
+    @media print {
+      html, body { width: 1280px; margin: 0; padding: 0; background: white; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .viewport, .ready .viewport { width: 1280px !important; height: auto !important; margin: 0; }
+      .deck, .ready .deck { transform: none !important; width: 1280px; height: auto; }
+      .slide, .slide[hidden], .ready .slide { display: flex !important; margin: 0; break-after: page; break-inside: avoid; }
+      .slide:last-child { break-after: auto; }
+      .toolbar, .ready .toolbar { display: none; }
+      .content { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="viewport" aria-label="Applied AI training slides">
+    <div class="deck">
+      <section class="slide dark cover" id="slide-1" aria-labelledby="title-1" data-title="Applied AI">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> Applied AI / Training</span><span>Day 1 / 28 September 2026</span></header>
+        <div class="content">
+          <p class="eyebrow">Four weeks. One individual project.</p>
+          <h1 id="title-1">Applied AI</h1>
+          <p class="intro">Understand how models learn. Work with reliable data.<br>Build answers grounded in real documents.</p>
+          <div class="cover-strip"><div><strong>PyTorch</strong><span>Learn &amp; train</span></div><div><strong>Transformers</strong><span>Use pretrained models</span></div><div><strong>RAG</strong><span>Retrieve &amp; answer</span></div></div>
+          <p class="small" style="margin-top:35px">Today: programme overview &amp; student onboarding.<br>From Friday: hands-on PyTorch fundamentals.</p>
+        </div>
+        <footer class="slide-footer"><span>Arunachala Hitech Engineering College</span><span class="folio">01 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-2" aria-labelledby="title-2" data-title="The four-week plan">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> The programme</span><span>01 / Orientation</span></header>
+        <div class="content"><p class="eyebrow">The route from foundations to a working project</p><h2 id="title-2">What we will cover</h2><p class="intro">Each stage produces something you can run, inspect and explain.</p>
+          <div class="weeks">
+            <article class="week"><p class="week-label">WEEK 01</p><h3>Onboard.<br>Start PyTorch.</h3><p>Today: the course plan and student access. From Friday: tensors, gradients and a basic training loop.</p><p class="result"><strong>Output</strong><br>Account ready + first PyTorch notebook.</p></article>
+            <article class="week"><p class="week-label">WEEK 02</p><h3>Validate.<br>Evaluate. Explore.</h3><p>Data checks before training, classifier metrics and pretrained Transformers with Hugging Face.</p><p class="result"><strong>Output</strong><br>Evaluation results + inference notebook.</p></article>
+            <article class="week"><p class="week-label">WEEK 03</p><h3>Retrieve.<br>Ground answers.</h3><p>Prepare documents, create embeddings, retrieve useful passages and connect a language model.</p><p class="result"><strong>Output</strong><br>An individual RAG prototype.</p></article>
+            <article class="week"><p class="week-label">WEEK 04</p><h3>Test.<br>Improve. Present.</h3><p>Check evidence and missing answers, compare a setting change and demonstrate your project.</p><p class="result"><strong>Output</strong><br>Notebook, evaluation, report + demo.</p></article>
+          </div>
+        </div><footer class="slide-footer"><span>Practical foundations, not large-model pretraining or production deployment.</span><span class="folio">02 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-3" aria-labelledby="title-3" data-title="How models learn">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> Learning fundamentals</span><span>Foundations</span></header>
+        <div class="content"><p class="eyebrow">Examples become patterns</p><h2 id="title-3">What does &ldquo;learning&rdquo; mean?</h2><p class="intro">A model adjusts numerical parameters so its predictions better match training examples.</p>
+          <div class="flow"><div class="step"><strong>Input</strong><span>Sensor readings<br>Temperature, vibration</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Model</strong><span>A function with<br>adjustable weights</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Prediction</strong><span>Normal operation<br>or maintenance needed</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Feedback</strong><span>Compare with the<br>known training label</span></div></div>
+          <div class="two"><article class="rule"><h3>Training: adjust the weights</h3><p>Measure error with a loss function. Use gradients and an optimizer to update the model.</p></article><article class="rule"><h3>Inference: use the weights</h3><p>Apply the trained model to a new input. A prediction does not normally update the model.</p></article></div>
+          <p class="takeaway">The goal is useful predictions on unseen examples, not memorising the training data.</p>
+        </div><footer class="slide-footer"><span>Illustrative engineering example / supervised learning</span><span class="folio">03 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-4" aria-labelledby="title-4" data-title="Dataset validation">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> Dataset validation</span><span>Before model training</span></header>
+        <div class="content"><p class="eyebrow">Reliable results start before the model</p><h2 id="title-4">Can we trust the dataset?</h2>
+          <div class="two" style="margin-top:22px"><div><table><caption>Illustrative sensor records</caption><thead><tr><th>Record</th><th>Temperature</th><th>Label</th></tr></thead><tbody><tr><td>S-101</td><td>68 &deg;C</td><td>Normal</td></tr><tr><td>S-102</td><td class="invalid">Missing</td><td>Fault</td></tr><tr><td>S-103</td><td class="invalid">&ldquo;hot&rdquo;</td><td>Normal</td></tr><tr><td class="invalid">S-101 again</td><td>68 &deg;C</td><td>Normal</td></tr></tbody></table><p class="caption">Check missing values, types, units, duplicates and labels.</p></div>
+          <div><h3>Three different jobs</h3><p><strong>Training:</strong> learn parameters.<br><strong>Validation:</strong> choose settings.<br><strong>Test:</strong> final held-out evaluation.</p><div class="split-bar" aria-label="Illustrative split: 70 percent training, 15 percent validation, 15 percent test"><div><strong>70%</strong>Train</div><div><strong>15%</strong>Val.</div><div><strong>15%</strong>Test</div></div><p class="caption">Example proportions, not a universal rule. Split by time or group when the problem requires it.</p></div></div>
+          <p class="takeaway"><strong>Avoid leakage:</strong> split first, fit preprocessing only on training data, and keep related or duplicate records out of different splits.</p>
+        </div><footer class="slide-footer"><span>Data validation checks the records. A validation set checks model choices.</span><span class="folio">04 / 12</span></footer>
+      </section>
+
+      <section class="slide dark" id="slide-5" aria-labelledby="title-5" data-title="Starting with PyTorch">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> PyTorch</span><span>Hands-on from Friday</span></header>
+        <div class="content"><p class="eyebrow">Our framework for learning the mechanics</p><h2 id="title-5">From numbers to a trainable model</h2><p class="intro">PyTorch provides tensors, automatic differentiation and building blocks for neural networks.</p>
+          <div class="three"><article class="rule"><h3>01 / Tensors</h3><p>Arrays of numbers with a shape, data type and device.</p><div class="tensor" role="img" aria-label="A two by four tensor with eight example values"><span>0.2</span><span>0.8</span><span>0.1</span><span>0.6</span><span>0.5</span><span>0.3</span><span>0.9</span><span>0.4</span></div><p class="small">Example shape: [2, 4]</p></article><article class="rule"><h3>02 / Autograd</h3><p>Track operations and calculate how the loss changes with each trainable parameter.</p><p class="code-line">loss.<b>backward()</b></p></article><article class="rule"><h3>03 / Model &amp; data</h3><p><strong>nn.Module</strong> defines a model.<br><strong>Dataset</strong> supplies examples.<br><strong>DataLoader</strong> forms batches.<br>An <strong>optimizer</strong> updates weights.</p></article></div>
+          <p class="takeaway">First practical: inspect tensors, run a forward pass, calculate loss and perform one update.</p>
+        </div><footer class="slide-footer"><span>Understand each operation before building a larger model.</span><span class="folio">05 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-6" aria-labelledby="title-6" data-title="Why GPUs matter">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> GPU computing</span><span>The hardware behind the workload</span></header>
+        <div class="content"><p class="eyebrow">Graphics Processing Unit</p><h2 id="title-6">Why AI uses GPUs</h2><p class="intro">Neural networks perform many similar numerical operations. GPUs can execute large amounts of this work in parallel.</p>
+          <div class="gpu-layout"><figure><canvas id="gpu-visual" width="1040" height="534" role="img" aria-label="Conceptual GPU diagram: a batch of tensors enters parallel compute lanes, with model weights and intermediate values held in GPU memory. Not a hardware specification.">A batch of tensors is processed across parallel GPU compute lanes. GPU memory holds weights, activations and other working data.</canvas><figcaption>Conceptual view, not an actual core count or chip layout.</figcaption></figure><div><ul><li><strong>Parallel work:</strong> matrix operations across batches of examples.</li><li><strong>GPU memory:</strong> holds weights, activations and, during training, gradients and optimizer state.</li><li><strong>Device consistency:</strong> model and input tensors must be on compatible devices.</li></ul><p class="small" style="margin-top:18px">We will check device availability and choose model and batch sizes that fit the available memory.</p></div></div>
+          <p class="takeaway">A GPU can speed up suitable workloads. It cannot fix poor data or guarantee a correct answer.</p>
+        </div><footer class="slide-footer"><span>Course focus: using GPU-backed notebooks, not designing GPU kernels.</span><span class="folio">06 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-7" aria-labelledby="title-7" data-title="Training and evaluation">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> Training &amp; evaluation</span><span>Measure before you improve</span></header>
+        <div class="content"><p class="eyebrow">A repeatable experiment</p><h2 id="title-7">Learning is a loop. Quality is a test.</h2>
+          <div class="flow"><div class="step"><strong>Predict</strong><span>Forward pass</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Measure</strong><span>Calculate loss</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Differentiate</strong><span>Backward pass</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Update</strong><span>Optimizer step</span></div></div>
+          <div class="two"><div><h3>What we will observe</h3><p>A <strong>batch</strong> is a group of examples.<br>An <strong>epoch</strong> is one pass through the training set.</p><p style="margin-top:16px">Falling training loss alone is not proof of better predictions. Compare a baseline and inspect validation errors.</p></div><div><div class="metric"><strong>Precision</strong><span>Of the cases predicted positive, how many really were positive?</span></div><div class="metric"><strong>Recall</strong><span>Of the actual positive cases, how many did we find?</span></div><div class="metric"><strong>F1 score</strong><span>The harmonic mean of precision and recall.</span></div></div></div>
+          <p class="takeaway">If 95 of 100 samples are normal, always predicting &ldquo;normal&rdquo; gets 95% accuracy and detects zero faults.</p>
+        </div><footer class="slide-footer"><span>Choose settings on validation data; use the held-out test set for final evaluation.</span><span class="folio">07 / 12</span></footer>
+      </section>
+
+      <section class="slide dark" id="slide-8" aria-labelledby="title-8" data-title="Understanding Transformers">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> Transformers</span><span>From tokens to context</span></header>
+        <div class="content"><p class="eyebrow">An architecture behind many modern language models</p><h2 id="title-8">Words depend on their context</h2><p class="intro">Attention lets a model combine information from relevant positions in a sequence.</p>
+          <div class="token-row" aria-label="Illustrative words: The motor stopped because it overheated"><span class="token">The</span><span class="token highlight">motor</span><span class="token">stopped</span><span class="token">because</span><span class="token highlight">it</span><span class="token">overheated</span></div>
+          <div class="attention"><p>&ldquo;It&rdquo; refers to &ldquo;motor&rdquo; in this sentence. Context matters.<br><span class="small">Word-level illustration only; actual tokenizers may split words into smaller pieces.</span></p></div>
+          <div class="three" style="margin-top:25px"><article><h3>Tokens</h3><p class="small">Text is converted into token IDs. Tokens may be words, subwords or other units.</p></article><article><h3>Embeddings &amp; positions</h3><p class="small">Numerical representations and position information make the sequence usable by the model.</p></article><article><h3>Attention &amp; output</h3><p class="small">Representations are updated using context. Task-specific outputs may be labels or generated text.</p></article></div>
+          <p class="takeaway">A context window is limited. Fluent generated text can still be factually wrong.</p>
+        </div><footer class="slide-footer"><span>We will use small pretrained models, not pretrain a large language model.</span><span class="folio">08 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-9" aria-labelledby="title-9" data-title="Pretrained models and Hugging Face">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> Hugging Face &amp; pretrained models</span><span>Use existing learned capabilities</span></header>
+        <div class="content"><p class="eyebrow">Architecture, library and model are different things</p><h2 id="title-9">From a model card to inference</h2><p class="intro">Hugging Face hosts model repositories. Its Transformers library helps load compatible tokenizers and models.</p>
+          <div class="flow"><div class="step"><strong>Inspect</strong><span>Task, model card,<br>license, limitations</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Load</strong><span>Matching tokenizer<br>and model weights</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Run</strong><span>Prepare input and<br>perform inference</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Review</strong><span>Check outputs,<br>failures and latency</span></div></div>
+          <div class="two"><article class="rule"><p class="compare-label">Our practical focus</p><h3>Pretrained inference</h3><p>Run a small model, understand its inputs and record where its predictions succeed or fail.</p></article><article class="rule"><p class="compare-label">An important distinction</p><h3>Fine-tuning changes weights</h3><p>It is not the same as prompting or RAG. Full fine-tuning is not a required project in this course.</p></article></div>
+          <p class="takeaway">Record the model ID, package versions and execution steps so someone else can reproduce your result.</p>
+        </div><footer class="slide-footer"><span>Choose for the task, license and available memory, not just model size.</span><span class="folio">09 / 12</span></footer>
+      </section>
+
+      <section class="slide" id="slide-10" aria-labelledby="title-10" data-title="How RAG works">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> Retrieval-Augmented Generation</span><span>Week 03 / Build the pipeline</span></header>
+        <div class="content"><p class="eyebrow">Give the model relevant evidence</p><h2 id="title-10">RAG: retrieve first, then answer</h2><p class="intro">Search approved documents and supply useful passages as context for the answer.</p>
+          <div class="rag-row"><strong>PREPARE</strong><div class="flow"><div class="step"><strong>Documents</strong><span>Extract readable text</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Chunks</strong><span>Keep source / page IDs</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Embeddings</strong><span>Numerical representations</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Index</strong><span>Store for search</span></div></div></div>
+          <div class="rag-row"><strong>ANSWER</strong><div class="flow"><div class="step"><strong>Question</strong><span>Embed the query</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Retrieve</strong><span>Top-k relevant chunks</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Generate</strong><span>Question + context</span></div><span class="arrow" aria-hidden="true">&rarr;</span><div class="step"><strong>Answer</strong><span>Supporting references</span></div></div></div>
+          <div class="evidence"><div><h3>Use one embedding space</h3><p>Encode documents and questions with the same compatible embedding model.</p></div><div><h3>Know when not to answer</h3><p>If evidence is missing, say the documents do not provide the answer.</p></div></div>
+          <p class="takeaway">RAG supplies context; it does not normally retrain the language model or eliminate hallucinations.</p>
+        </div><footer class="slide-footer"><span>Similarity finds candidates. Evaluation checks whether they actually support the answer.</span><span class="folio">10 / 12</span></footer>
+      </section>
+
+      <section class="slide dark" id="slide-11" aria-labelledby="title-11" data-title="Your individual project">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> The individual project</span><span>Week 04 / Evaluate &amp; present</span></header>
+        <div class="content"><p class="eyebrow">A document assistant you can explain and test</p><h2 id="title-11">A useful answer needs evidence</h2><p class="intro">Choose approved engineering documents: a lab manual, equipment guide or technical reference relevant to your discipline.</p>
+          <div class="three"><article class="rule"><span class="number">Build</span><h3>A working RAG notebook</h3><p class="small">Document preparation, retrieval, answers and source references. Keep a source manifest and reproducible execution steps.</p></article><article class="rule"><span class="number">Test</span><h3>Ten deliberate questions</h3><p class="small">6 factual + 2 multi-passage + 2 unanswerable. Check retrieval, correctness, evidence support and response time.</p></article><article class="rule"><span class="number">Show</span><h3>Results, not just a demo</h3><p class="small">Compare one chunk-size or top-k change. Submit your notebook, evaluation table, 2-3 page report and five-slide presentation.</p></article></div>
+          <p class="takeaway"><strong>Responsible use:</strong> avoid private data; treat document instructions as untrusted; verify that citations support the claims. A citation alone is not proof.</p>
+          <p class="small" style="margin-top:17px">Keep a small question subset unseen until final assessment. Discuss limitations and at least one failure case.</p>
+        </div><footer class="slide-footer"><span>Individual work across engineering disciplines / no team submission required</span><span class="folio">11 / 12</span></footer>
+      </section>
+
+      <section class="slide lime" id="slide-12" aria-labelledby="title-12" data-title="Today: student onboarding">
+        <header class="slide-header"><span class="brand"><span class="brand-mark">AI</span> Ready for the first practical</span><span>Monday / Day 1</span></header>
+        <div class="content"><p class="eyebrow">Today is orientation, not a coding assessment</p><h2 id="title-12">Get connected. Know the plan.</h2><p class="intro">Leave today with working student access and a clear picture of what you will build.</p>
+          <div class="check-grid"><article class="check-item"><span class="index">01</span><div><h3>Register or sign in</h3><p>Use your existing account if you already have one. Keep your password private.</p></div></article><article class="check-item"><span class="index">02</span><div><h3>Verify your profile</h3><p>Check your name, student ID, department and contact details. Report corrections to the admin.</p></div></article><article class="check-item"><span class="index">03</span><div><h3>Explore all four weeks</h3><p>Open the week cards and review sessions, tasks and deliverables. The admin marks weekly progress.</p></div></article><article class="check-item"><span class="index">04</span><div><h3>Confirm practical readiness</h3><p>Confirm laptop, notebook access and class joining details with the trainer. Raise setup questions now.</p></div></article></div>
+          <p class="next-class"><strong>From Friday:</strong> PyTorch tensors, gradients and your first training loop.</p>
+        </div><footer class="slide-footer"><span>Questions / expectations / onboarding support</span><span class="folio">12 / 12</span></footer>
+      </section>
+    </div>
+  </main>
+  <nav class="toolbar" aria-label="Slide controls">
+    <button id="previous" type="button" aria-label="Previous slide" title="Previous slide">&larr;</button>
+    <select id="slide-select" aria-label="Choose slide"></select>
+    <output id="position" aria-live="polite" aria-atomic="true">1 / 12</output>
+    <button id="next" type="button" aria-label="Next slide" title="Next slide">&rarr;</button>
+    <button id="fullscreen" type="button" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
+    <button id="print" class="print" type="button" title="Print all slides">Print</button>
+  </nav>
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const viewport = document.querySelector('.viewport');
+    const deck = document.querySelector('.deck');
+    const toolbar = document.querySelector('.toolbar');
+    const selector = document.getElementById('slide-select');
+    const previousButton = document.getElementById('previous');
+    const nextButton = document.getElementById('next');
+    const fullscreenButton = document.getElementById('fullscreen');
+    const position = document.getElementById('position');
+    let currentSlide = 0;
+
+    slides.forEach((slide, index) => {
+      const option = document.createElement('option');
+      option.value = String(index);
+      option.textContent = `${index + 1}. ${slide.dataset.title}`;
+      selector.append(option);
+    });
+
+    function fitSlides() {
+      const availableHeight = Math.max(120, window.innerHeight - toolbar.offsetHeight - 48);
+      const scale = Math.max(.1, Math.min(1.5, (window.innerWidth - 24) / 1280, availableHeight / 720));
+      viewport.style.width = `${1280 * scale}px`;
+      viewport.style.height = `${720 * scale}px`;
+      deck.style.transform = `scale(${scale})`;
+    }
+
+    function showSlide(index, updateHash = true) {
+      currentSlide = Math.max(0, Math.min(slides.length - 1, index));
+      slides.forEach((slide, slideIndex) => { slide.hidden = slideIndex !== currentSlide; });
+      selector.value = String(currentSlide);
+      previousButton.disabled = currentSlide === 0;
+      nextButton.disabled = currentSlide === slides.length - 1;
+      position.textContent = `${currentSlide + 1} / ${slides.length}`;
+      document.title = `${currentSlide + 1}. ${slides[currentSlide].dataset.title} | Applied AI`;
+      if (updateHash) window.location.hash = `slide-${currentSlide + 1}`;
+    }
+
+    function readHash() {
+      const match = /^#slide-(\d+)$/.exec(window.location.hash);
+      showSlide(match ? Number(match[1]) - 1 : 0, false);
+    }
+
+    previousButton.addEventListener('click', () => showSlide(currentSlide - 1));
+    nextButton.addEventListener('click', () => showSlide(currentSlide + 1));
+    selector.addEventListener('change', () => showSlide(Number(selector.value)));
+    document.getElementById('print').addEventListener('click', () => window.print());
+    fullscreenButton.hidden = !document.fullscreenEnabled;
+    fullscreenButton.addEventListener('click', async () => {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await document.documentElement.requestFullscreen();
+      } catch {
+        fullscreenButton.hidden = true;
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('select, input, textarea, button, [contenteditable]')) return;
+      if (['ArrowRight', 'PageDown', ' ', 'ArrowLeft', 'PageUp', 'Home', 'End'].includes(event.key)) {
+        event.preventDefault();
+        if (event.key === 'Home') showSlide(0);
+        else if (event.key === 'End') showSlide(slides.length - 1);
+        else showSlide(currentSlide + (['ArrowRight', 'PageDown', ' '].includes(event.key) ? 1 : -1));
+      }
+    });
+    window.addEventListener('resize', fitSlides);
+    window.addEventListener('hashchange', readHash);
+    document.addEventListener('fullscreenchange', fitSlides);
+
+    function drawGpu() {
+      const canvas = document.getElementById('gpu-visual');
+      const context = canvas.getContext('2d');
+      if (!context) return;
+      context.scale(2, 2);
+      context.fillStyle = '#e5eee8';
+      context.fillRect(0, 0, 520, 267);
+      context.fillStyle = '#17221f';
+      context.font = 'bold 17px sans-serif';
+      context.fillText('BATCH OF TENSORS', 22, 33);
+      context.fillText('PARALLEL COMPUTE', 206, 33);
+      for (let row = 0; row < 4; row += 1) {
+        context.fillStyle = row % 2 ? '#bfeae2' : '#c5f277';
+        context.fillRect(22 + row * 5, 57 + row * 26, 114, 21);
+        context.fillStyle = '#17221f';
+        context.font = '13px monospace';
+        context.fillText('[0.2, 0.8, ...]', 26 + row * 5, 72 + row * 26);
+      }
+      context.strokeStyle = '#005f55';
+      context.lineWidth = 2;
+      context.beginPath(); context.moveTo(156, 109); context.lineTo(190, 109); context.lineTo(180, 102); context.moveTo(190, 109); context.lineTo(180, 116); context.stroke();
+      for (let row = 0; row < 4; row += 1) {
+        for (let column = 0; column < 8; column += 1) {
+          context.fillStyle = (row + column) % 3 === 0 ? '#a83726' : '#005f55';
+          context.fillRect(207 + column * 36, 53 + row * 29, 28, 21);
+        }
+      }
+      context.fillStyle = '#17221f'; context.fillRect(22, 187, 476, 58);
+      context.fillStyle = '#fff'; context.font = 'bold 15px sans-serif';
+      context.fillText('GPU MEMORY', 36, 210);
+      context.font = '14px sans-serif'; context.fillText('Weights + activations + working data', 36, 231);
+    }
+
+    drawGpu();
+    document.body.classList.add('ready');
+    readHash();
+    fitSlides();
+  </script>
+</body>
+</html>
