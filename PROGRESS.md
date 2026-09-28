@@ -5,7 +5,8 @@ Last updated: 2026-09-28
 ## Repository Setup
 
 - Initialized this course directory as a Git repository on main, connected to https://github.com/Zyora-Dev/applied.git. Remote was empty before initialization. Repository root contains frontend/, backend/ and course materials.
-- Added root ignore rules for environment secrets, dependencies, builds, caches, private keys and database files. Initial source upload is being prepared; Render deployment and production validation remain pending.
+- Added root ignore rules for environment secrets, dependencies, builds, caches, private keys and database files. Verified exclusions and scanned 77 staged files for common credential patterns; checks passed.
+- Initial source commit cfbc558 pushed successfully to origin/main on 2026-09-28, with upstream tracking configured. Includes frontend, backend and training materials; local environment secrets, database data and generated dependencies/builds were not uploaded. Render deployment and production validation remain pending.
 
 ## Day 1 Training Slides
 
