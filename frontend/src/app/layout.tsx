@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import "@fontsource-variable/inter";
 import "./globals.css";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
+
 export const metadata: Metadata = {
-  title: "Admin sign in | Applied AI",
-  description: "Applied AI course administration at Arunachala.",
-  robots: { index: false, follow: false },
+  title: "Applied AI",
+  description: "Applied AI",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="dark">
-      <body suppressHydrationWarning><TooltipProvider delayDuration={250}>{children}</TooltipProvider></body>
+    <html lang="en" className={cn("dark font-sans antialiased", geist.variable)}>
+      <body suppressHydrationWarning><TooltipProvider>{children}</TooltipProvider></body>
     </html>
   );
 }

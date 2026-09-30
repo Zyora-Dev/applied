@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="First-day introduction to PyTorch: what it is, its role in AI and ML, its architecture, tensors and three explained beginner examples.">
+<title>Getting Started with PyTorch | Arunachala</title>
+<style>
+:root{color-scheme:light;--paper:#f6f8f7;--ink:#152522;--green:#006454;--lime:#c6f279;--line:#a5bab2;--blue:#12598c}
+*{box-sizing:border-box}body{margin:0;background:#e0e6e3;color:var(--ink);font-family:"Avenir Next","Trebuchet MS",sans-serif;letter-spacing:0}button,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}a{color:inherit}:focus-visible{outline:3px solid #278ac6;outline-offset:3px}h1,h2,h3,p,figure,pre{margin:0}h1,h2{font-family:Georgia,serif;font-weight:400}h1{font-size:76px;line-height:1.08}h2{font-size:44px;line-height:1.15}h3{font-size:24px;line-height:1.3;margin-bottom:12px}p,li{font-size:22px;line-height:1.5}ul,ol{padding-left:26px;margin:0}li+li{margin-top:12px}code,pre{font-family:Menlo,Consolas,monospace}p code,li code{font-size:.85em}.deck{max-width:1440px;margin:auto}.slide{min-height:calc(100dvh - 64px);padding:26px 56px 28px;display:flex;flex-direction:column;gap:24px;background:var(--paper)}.slide[hidden]{display:none}.dark{--paper:#142822;--ink:#fff;--green:#c6f279;--line:#698078}.lime{--paper:#c6f279}.mast{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);padding-bottom:12px;font-size:13px;font-weight:700;text-transform:uppercase}.body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px}.kicker{font-size:14px;font-weight:800;text-transform:uppercase;color:var(--green)}.lead{font-size:27px;line-height:1.45;max-width:1100px}.small{font-size:18px;line-height:1.5}.columns{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}.columns>*,.three>*{min-width:0}.rule{border-top:3px solid var(--green);padding-top:18px}.stack{display:flex;flex-direction:column;gap:18px}.takeaway{border-top:1px solid var(--line);padding-top:14px;font-size:19px;line-height:1.45}.takeaway strong{color:var(--green)}.code{max-width:100%;overflow:auto;background:#142822;color:#fff;border-left:5px solid #52c8b2;padding:22px;font-size:20px;line-height:1.7;white-space:pre}.key{color:#83e5d0}.num{color:#dcf898}.str{color:#ffc8af}.output{padding:16px 18px;background:#e0eee7;border-left:3px solid #006454;color:#152522;font-size:20px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.explain{font-size:19px;line-height:1.5}.explain dt{font-weight:800;color:var(--green)}.explain dd{margin:2px 0 13px}.explain dd:last-child{margin-bottom:0}dl{margin:0}.flow{display:flex;gap:18px;align-items:center}.flow>div{flex:1;min-width:0;border-top:3px solid var(--green);padding-top:16px}.arrow{font-size:28px;color:var(--green)}.flow p{font-size:19px}.band{padding:16px 20px;border-left:4px solid var(--green);background:#e0eee7;color:#152522}.architecture{display:grid;grid-template-columns:200px 1fr;gap:0 24px}.architecture strong,.architecture p{padding:14px 0;border-bottom:1px solid var(--line)}.architecture strong{font-size:21px}.architecture p{font-size:20px}.cells{display:grid;grid-template-columns:repeat(3,74px);gap:6px;width:max-content}.cell{display:grid;place-items:center;height:66px;background:#c6f279;color:#152522;font:26px Menlo,Consolas,monospace}.cell.blue{background:#c9e7ef}.cell.red{background:#f3c6ca}.single{grid-template-columns:74px}.matrix{border-left:3px solid var(--green);border-right:3px solid var(--green);padding:8px;display:inline-block;width:max-content}.figure{display:flex;flex-direction:column;gap:18px;align-items:flex-start}.figure figcaption{font-size:18px;line-height:1.5}.big{font:54px/1.2 Georgia,serif}.equation{font:32px/1.5 Menlo,Consolas,monospace}.reveal{visibility:hidden}.reveal.shown{visibility:visible}.notes{display:none}.toolbar{height:64px;position:sticky;bottom:0;display:flex;justify-content:center;align-items:center;gap:12px;padding:10px;background:#fff;color:#152522;border-top:1px solid #a5bab2;z-index:5}.toolbar[hidden]{display:none}.toolbar button{height:40px;min-width:40px;border:1px solid #a5bab2;background:#f6f8f7;color:#152522;border-radius:3px;font-size:20px}.toolbar select{height:40px;max-width:310px;background:#fff;color:#152522;border:1px solid #a5bab2;padding:0 8px}.count{min-width:70px;text-align:center;font-size:14px}.progress{height:3px;background:#006454;position:fixed;bottom:0;left:0;z-index:6}dialog{max-width:700px;width:calc(100% - 40px);border:1px solid #a5bab2;padding:28px;color:#152522;background:#fff}dialog::backdrop{background:#0009}dialog h2{font-size:28px;margin-bottom:18px}dialog p{font-size:19px;white-space:pre-line}dialog button{display:block;margin:22px 0 0 auto;padding:10px 20px;background:#006454;color:white;border:0}.active{animation:appear .15s ease-out}@keyframes appear{from{opacity:.5}to{opacity:1}}
+@media(max-width:1050px){.slide{padding:24px 30px}h1{font-size:60px}h2{font-size:36px}p,li{font-size:20px}.lead{font-size:24px}.columns{gap:28px}.code{font-size:17px;padding:18px}.explain{font-size:17px}.cells{grid-template-columns:repeat(3,60px)}.single{grid-template-columns:60px}.cell{height:54px}.three{gap:22px}.architecture{grid-template-columns:160px 1fr}.architecture p{font-size:18px}}
+@media(max-width:620px){.slide{padding:22px 20px;gap:22px}.body{justify-content:flex-start;gap:24px}h1{font-size:46px}h2{font-size:33px}h3{font-size:22px}.lead{font-size:22px}.mast{font-size:11px}.columns,.three{grid-template-columns:1fr}.flow{flex-direction:column;align-items:stretch;gap:12px}.flow .arrow{transform:rotate(90deg);align-self:center}.architecture{grid-template-columns:1fr}.architecture strong{border-bottom:0;padding-bottom:0}.architecture p{padding-top:6px}.code{font-size:15px;padding:16px}.output{font-size:17px}.equation{font-size:23px}.big{font-size:44px}.takeaway{font-size:17px}.toolbar{gap:6px;padding:8px}.toolbar select{max-width:95px}.toolbar button{min-width:34px}.count{min-width:48px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@page{size:A4 landscape;margin:0}
+@media print{body{background:#fff}.deck{max-width:none}.slide,.slide[hidden]{display:flex!important;height:209mm;min-height:0;width:297mm;padding:12mm 15mm;gap:5mm;break-after:page;break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}.slide:last-child{break-after:auto}.toolbar,.progress,dialog{display:none!important}.reveal{visibility:visible!important}.body{gap:20px;justify-content:center}h1{font-size:56px}h2{font-size:34px}h3{font-size:22px}p,li{font-size:18px}.lead{font-size:22px}.small,.explain,.takeaway{font-size:16px}.code,.output{font-size:16px;padding:16px}.columns{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.flow{flex-direction:row}.flow .arrow{transform:none}.architecture{grid-template-columns:180px 1fr}.architecture strong{border-bottom:1px solid var(--line);padding:12px 0}.architecture p{font-size:18px;padding:12px 0}.notes{display:none!important}}
+</style>
+</head>
+<body>
+<noscript><p>All slides are shown below. Browser printing remains available without JavaScript.</p></noscript>
+<main class="deck">
+<section class="slide dark" data-title="Getting started with PyTorch">
+<header class="mast"><span>Arunachala / Applied AI</span><span>Day 1 / Wednesday, 30 September 2026</span></header>
+<div class="body"><p class="kicker">Our first PyTorch class</p><h1>Getting started<br>with PyTorch.</h1><p class="lead">What it is. Why AI needs it. How it works.<br>Then, our first few lines of code.</p><div class="flow"><div><h3>Understand</h3><p>The purpose of the tool.</p></div><span class="arrow" aria-hidden="true">&rarr;</span><div><h3>Visualize</h3><p>How it represents data.</p></div><span class="arrow" aria-hidden="true">&rarr;</span><div><h3>Try</h3><p>One idea at a time.</p></div></div></div>
+<footer class="takeaway">No previous PyTorch knowledge assumed.</footer><aside class="notes">Begin by asking who has heard the word PyTorch. Do not ask students to open the handbook or copy code now. This is an introductory lesson, not a tensor API walkthrough. Allow discussion; the examples come only after the concepts. Notes open on this same screen, so read them before projecting. Right/Space advances or reveals, Left goes back, F fullscreen, N notes, Escape closes notes.</aside>
+</section>
+<section class="slide" data-title="What we will understand today">
+<header class="mast"><span>Today's scope</span><span>Understanding before syntax</span></header>
+<div class="body"><h2>Four questions for our first day.</h2><div class="columns"><div class="stack"><div class="rule"><h3>1. What is PyTorch?</h3><p>A software tool, not an AI model or a new programming language.</p></div><div class="rule"><h3>2. Why does AI/ML use it?</h3><p>To calculate predictions and support learning from data.</p></div></div><div class="stack"><div class="rule"><h3>3. How is it built?</h3><p>Python interfaces connected to numerical engines and hardware.</p></div><div class="rule"><h3>4. What is a tensor?</h3><p>The basic way PyTorch represents numerical data.</p></div></div></div></div>
+<footer class="takeaway">Friday: continue tensor basics and operations, then exercises. We are not training a model today.</footer><aside class="notes">Make the boundary explicit. Today students should be able to explain the tool and read a very small example. Indexing, slicing, device movement, reshaping and the training API are not prerequisites for this talk.</aside>
+</section>
+<section class="slide" data-title="AI, machine learning and deep learning">
+<header class="mast"><span>01 / The context</span><span>Three related terms</span></header>
+<div class="body"><h2>Where does PyTorch fit?</h2><div class="three"><div class="rule"><h3>Artificial intelligence</h3><p>The broad field of building systems that perform tasks such as perception, reasoning and decision-making.</p><p class="small">Some AI systems use written rules.</p></div><div class="rule"><h3>Machine learning</h3><p>A part of AI where models learn patterns from data rather than receiving every decision rule explicitly.</p><p class="small">Example: estimate energy use from past measurements.</p></div><div class="rule"><h3>Deep learning</h3><p>A part of machine learning that uses neural networks with multiple processing layers.</p><p class="small">Example: learn visual patterns in inspection images.</p></div></div><p class="band">Deep learning is within machine learning; machine learning is within AI.</p></div>
+<footer class="takeaway"><strong>PyTorch is a tool used to build and train models</strong>, especially in deep learning.</footer><aside class="notes">Do not equate all AI with neural networks. A neural network is a mathematical model made of connected processing layers, not a literal human brain. PyTorch also handles ordinary numerical calculations; its usefulness is not limited to deep learning.</aside>
+</section>
+<section class="slide" data-title="What is PyTorch?">
+<header class="mast"><span>01 / Definition</span><span>The tool itself</span></header>
+<div class="body"><h2>PyTorch is an open-source framework<br>for numerical computing and machine learning.</h2><p class="lead">It gives us reusable software for storing numbers, calculating with them, building models and supporting their training.</p><div class="three"><div class="rule"><h3>Python-friendly</h3><p>We usually write our instructions in Python and call PyTorch's functions.</p></div><div class="rule"><h3>A framework</h3><p>A connected collection of tools. We do not have to implement every calculation and training component ourselves.</p></div><div class="rule"><h3>Open source</h3><p>Its source code is publicly available to inspect, use and contribute to under its licence.</p></div></div></div>
+<footer class="takeaway"><strong>Python is the language. PyTorch is a framework we use through it.</strong></footer><aside class="notes">Read the definition slowly, then unpack each term. A framework supplies building blocks, not a finished solution to every task. PyTorch has C++ interfaces too; Python is our classroom entry point. Open source does not mean the hardware or cloud computation is free.</aside>
+</section>
+<section class="slide" data-title="What PyTorch is useful for">
+<header class="mast"><span>01 / Purpose</span><span>Across engineering disciplines</span></header>
+<div class="body"><h2>Different problems. The same need to learn patterns.</h2><div class="three"><div class="rule"><h3>Predict a number</h3><p>Use weather and building measurements to estimate electricity demand.</p><p class="small"><strong>Input:</strong> measurements<br><strong>Output:</strong> estimated energy use</p></div><div class="rule"><h3>Recognize a category</h3><p>Use labelled component images to learn signs of manufacturing defects.</p><p class="small"><strong>Input:</strong> inspection image<br><strong>Output:</strong> defect category</p></div><div class="rule"><h3>Analyze a signal</h3><p>Use vibration recordings to learn patterns associated with equipment condition.</p><p class="small"><strong>Input:</strong> vibration readings<br><strong>Output:</strong> condition estimate</p></div></div><p class="band">PyTorch provides the computation. We must supply suitable data, model choices and evaluation.</p></div>
+<footer class="takeaway">A model's answer is an estimate to validate, not automatically an engineering fact.</footer><aside class="notes">Ask students for a measurement from their own department. These are potential applications, not claims that a few lines of PyTorch solve them reliably. Labels are known target answers supplied with examples; explain that word before using it later.</aside>
+</section>
+<section class="slide" data-title="Written rules versus learned patterns">
+<header class="mast"><span>02 / Why machine learning?</span><span>A familiar distinction</span></header>
+<div class="body"><h2>Sometimes we know the rule.<br>Sometimes we need to learn a relationship.</h2><div class="columns"><div class="rule"><h3>A rule we already know</h3><p>Convert Celsius to Fahrenheit.</p><p class="equation">F = C &times; 9 / 5 + 32</p><p>We write the formula. Training is unnecessary.</p></div><div class="rule"><h3>A relationship to estimate</h3><p>Predict a building's electricity use from temperature, occupancy and past records.</p><p>There may be no simple formula that we already know. A model can fit patterns in historical data.</p></div></div></div>
+<footer class="takeaway"><strong>Use learning when it helps solve the problem.</strong> Not every calculation needs AI.</footer><aside class="notes">Ask: would you train a neural network just to convert units? Usually no. Learning still depends on human choices and assumptions. Domain equations may also be combined with learned models; do not present physics and ML as mutually exclusive.</aside>
+</section>
+<section class="slide" data-title="The vocabulary of training">
+<header class="mast"><span>02 / Training explained</span><span>No code yet</span></header>
+<div class="body"><h2>What does it mean to train a model?</h2><p class="lead">Training adjusts a model's internal numbers so its predictions better match known examples.</p><div class="columns"><dl class="explain"><dt>Data / input</dt><dd>The information given to the model, such as temperature and occupancy.</dd><dt>Target</dt><dd>The known answer in a training example, such as measured electricity use.</dd><dt>Prediction</dt><dd>The answer calculated by the model.</dd></dl><dl class="explain"><dt>Model</dt><dd>A mathematical relationship that turns inputs into predictions.</dd><dt>Parameters / weights</dt><dd>Adjustable numbers inside that relationship.</dd><dt>Loss</dt><dd>A number describing how far predictions are from targets.</dd></dl></div></div>
+<footer class="takeaway">Training changes parameters. It does not mean manually rewriting the program for every example.</footer><aside class="notes">Give one verbal example: measured use is 12 units and the model estimates 10. There is a mismatch to measure. Do not introduce loss functions or differentiation formulas here. Inputs and targets must refer to the same example.</aside>
+</section>
+<section class="slide" data-title="Why PyTorch helps with training">
+<header class="mast"><span>02 / Training explained</span><span>The repeated calculation</span></header>
+<div class="body"><h2>Learning needs a repeatable calculation cycle.</h2><div class="flow"><div><h3>1. Predict</h3><p>Pass numerical inputs through the model.</p></div><span class="arrow" aria-hidden="true">&rarr;</span><div><h3>2. Compare</h3><p>Calculate loss against known targets.</p></div><span class="arrow" aria-hidden="true">&rarr;</span><div><h3>3. Adjust</h3><p>Update parameters, then repeat.</p></div></div><div class="columns"><div class="rule"><h3>Why a framework helps</h3><p>Real models can have millions of parameters and large amounts of data. Repeating all these calculations manually is impractical.</p></div><div class="rule"><h3>PyTorch's contribution</h3><p>Fast tensor operations, automatic gradient calculation, model building blocks and update algorithms.</p></div></div></div>
+<footer class="takeaway">A <strong>gradient</strong> measures how loss changes with a parameter; an <strong>optimizer</strong> uses gradients to update parameters.</footer><aside class="notes">This is a map of the process, not today's coding task. Automatic differentiation computes derivatives of supported recorded operations; it does not choose the dataset or guarantee good learning. Evaluate on held-out data because lower training loss alone does not prove useful predictions.</aside>
+</section>
+<section class="slide" data-title="Training versus using a model">
+<header class="mast"><span>02 / Two stages</span><span>Learning and inference</span></header>
+<div class="body"><h2>Learning a pattern is different from using it.</h2><div class="columns"><div class="rule"><h3>Training</h3><p>Use examples with known answers, compare predictions, and update the model's parameters.</p><p class="band">Past building records &rarr; adjust the model</p></div><div class="rule"><h3>Inference</h3><p>Use a trained model to calculate a prediction for a new input, without updating its parameters.</p><p class="band">Tomorrow's conditions &rarr; predicted energy use</p></div></div><p>PyTorch supports both stages. A model must be tested on data not used to fit it.</p></div>
+<footer class="takeaway">The examples in today's slides are calculations, <strong>not a trained AI model</strong>.</footer><aside class="notes">Our training explanation is the supervised-learning case. Other learning setups exist, but introducing them all would distract from the first-day purpose. Explain inference as using what was learned, without implying the model understands the building like a person.</aside>
+</section>
+<section class="slide" data-title="Where PyTorch came from">
+<header class="mast"><span>03 / How PyTorch is made</span><span>Origins and development</span></header>
+<div class="body"><h2>Built by engineers. Developed in the open.</h2><div class="three"><div class="rule"><p class="kicker">Roots</p><h3>Torch</h3><p>The earlier Torch ecosystem provided scientific-computing and machine-learning tools, commonly used through Lua.</p></div><div class="rule"><p class="kicker">Public release / 2017</p><h3>PyTorch</h3><p>Originally developed at Facebook AI Research with contributors, bringing a Python-centered approach to tensor computing and deep learning.</p></div><div class="rule"><p class="kicker">Today</p><h3>An open ecosystem</h3><p>Maintained by a broad contributor community, with the PyTorch Foundation under the Linux Foundation.</p></div></div><p class="lead">PyTorch itself is software written and maintained by people. It is not a model trained on a dataset.</p></div>
+<footer class="takeaway">Official project: <a href="https://pytorch.org/" target="_blank" rel="noreferrer">pytorch.org</a></footer><aside class="notes">Explain the difference between building the framework and training a model with it. PyTorch is not simply the old Lua interface renamed; it developed its own Python-centered system while sharing roots with Torch. Avoid attributing the entire project to one individual.</aside>
+</section>
+<section class="slide" data-title="Inside PyTorch: software layers">
+<header class="mast"><span>03 / How PyTorch is made</span><span>From our code to computation</span></header>
+<div class="body"><h2>Simple Python on top. Numerical engines underneath.</h2><div class="architecture"><strong>Our Python code</strong><p>We describe data, operations and models using PyTorch's interface.</p><strong>PyTorch core</strong><p>Much of the numerical core is C++. It represents tensors and selects implementations for operations.</p><strong>Compute routines</strong><p>Optimized routines, often called kernels, perform the actual arithmetic.</p><strong>Hardware</strong><p>CPU or supported accelerators execute the work. CUDA supports NVIDIA GPU computation.</p></div><p class="band">A short Python instruction can trigger a large optimized calculation underneath.</p></div>
+<footer class="takeaway"><strong>We use the Python interface today.</strong> We do not need to write C++ or GPU kernels.</footer><aside class="notes">This is a simplified architecture. The dispatcher selects implementations according to properties such as device and dtype; ATen is a core tensor library. PyTorch supports other accelerator backends too, so CUDA is not synonymous with every GPU. A kernel here means a compute routine, not the notebook runtime.</aside>
+</section>
+<section class="slide" data-title="The main building blocks">
+<header class="mast"><span>03 / How PyTorch is organized</span><span>Recognize the names, not the syntax</span></header>
+<div class="body"><h2>Four building blocks you will meet.</h2><div class="columns"><div class="stack"><div class="rule"><h3>Tensors</h3><p>Store numerical data and support calculations. <strong>This is where we begin today.</strong></p></div><div class="rule"><h3>Autograd</h3><p>Tracks supported operations when gradient tracking is enabled and computes derivatives needed for learning.</p></div></div><div class="stack"><div class="rule"><h3>torch.nn</h3><p>Provides neural-network building blocks and loss functions.</p></div><div class="rule"><h3>torch.optim</h3><p>Provides optimizers that update model parameters using computed gradients.</p></div></div></div></div>
+<footer class="takeaway">Data representation first. Model and training details come after the foundations.</footer><aside class="notes">Do not explain constructors or backward calls yet. Students only need to know each component's responsibility. Ordinary tensors do not automatically track every calculation for training; gradient tracking must be enabled where appropriate.</aside>
+</section>
+<section class="slide" data-title="Why numbers come first">
+<header class="mast"><span>04 / Understanding tensors</span><span>Representing the real world</span></header>
+<div class="body"><h2>Before a model calculates, data must become numbers.</h2><div class="three"><div class="rule"><h3>Sensor readings</h3><p>Temperatures or voltages are already numerical measurements.</p></div><div class="rule"><h3>Images</h3><p>Pixel brightness and colour values can be stored as numerical arrays.</p></div><div class="rule"><h3>Text</h3><p>Text is encoded into numerical representations before a model processes it.</p></div></div><div class="flow"><div><h3>Real-world observation</h3><p>Three temperature measurements.</p></div><span class="arrow" aria-hidden="true">&rarr;</span><figure class="figure"><div class="cells"><span class="cell">20</span><span class="cell">25</span><span class="cell">30</span></div><figcaption>Numerical representation</figcaption></figure></div></div>
+<footer class="takeaway">The representation must preserve the information and meaning needed for the task.</footer><aside class="notes">No need to teach tokenization or image channel ordering. Explain that the framework receives numbers, not the physical sensor itself. Units and interpretation remain our responsibility. Use these same three temperatures for all of today's code examples.</aside>
+</section>
+<section class="slide" data-title="What is a tensor?">
+<header class="mast"><span>04 / Understanding tensors</span><span>The central object</span></header>
+<div class="body"><h2>A tensor is a numerical array<br>arranged along zero or more axes.</h2><p class="lead">It can represent one value, a list of values, a table, or a higher-dimensional arrangement.</p><div class="columns"><figure class="figure"><div class="matrix"><div class="cells"><span class="cell">20</span><span class="cell">25</span><span class="cell">30</span></div></div><figcaption>Three temperatures stored together.</figcaption></figure><div class="stack"><p>PyTorch knows the values, their arrangement and their numerical type.</p><p>It does <strong>not</strong> automatically know that these numbers are temperatures measured in degrees Celsius.</p></div></div></div>
+<footer class="takeaway"><strong>A tensor is a data container, not a model and not a prediction.</strong></footer><aside class="notes">Use the computing meaning of tensor, not a full mathematical treatment of tensors under coordinate transformations. Ask what information is missing if someone just gives us [20, 25, 30]: units, time order, sensor identity, and so on.</aside>
+</section>
+<section class="slide" data-title="Scalar, vector and matrix">
+<header class="mast"><span>04 / Understanding tensors</span><span>Names for arrangements</span></header>
+<div class="body"><h2>Three arrangements we already understand.</h2><div class="three"><figure class="figure"><h3>Scalar / 0 axes</h3><div class="matrix"><div class="cells single"><span class="cell">25</span></div></div><figcaption>One temperature.<br>No axis to move along.</figcaption></figure><figure class="figure"><h3>Vector / 1 axis</h3><div class="matrix"><div class="cells"><span class="cell">20</span><span class="cell">25</span><span class="cell">30</span></div></div><figcaption>Three readings in order.<br>One position selects a reading.</figcaption></figure><figure class="figure"><h3>Matrix / 2 axes</h3><div class="matrix"><div class="cells"><span class="cell">20</span><span class="cell">25</span><span class="cell">30</span><span class="cell blue">22</span><span class="cell blue">27</span><span class="cell blue">32</span></div></div><figcaption>Two sensors, three times.<br>A row and column locate a value.</figcaption></figure></div></div>
+<footer class="takeaway">Scalar, vector and matrix are the 0D, 1D and 2D cases of tensors.</footer><aside class="notes">Physically point across the vector, then across and down the matrix. Dimension counts independent index directions, not the number of values. A vector of 100 readings is still one-dimensional. Higher-dimensional tensors can be introduced on Friday.</aside>
+</section>
+<section class="slide" data-title="Shape, dimensions and values">
+<header class="mast"><span>04 / Understanding tensors</span><span>Read a diagram before code</span></header>
+<div class="body"><h2>Shape tells us how many positions each axis has.</h2><div class="columns"><figure class="figure"><p class="small">Columns: morning / noon / evening</p><div class="matrix"><div class="cells"><span class="cell">20</span><span class="cell">25</span><span class="cell">30</span><span class="cell blue">22</span><span class="cell blue">27</span><span class="cell blue">32</span></div></div><figcaption>Green row: sensor A<br>Blue row: sensor B</figcaption></figure><div class="stack"><p><strong>Shape (2, 3):</strong> two rows and three columns.</p><p><strong>Dimensions = 2:</strong> the row axis and the column axis.</p><p><strong>Number of values = 6:</strong> 2 &times; 3 measurements.</p></div></div><p class="band">Six values do not mean six dimensions. Arrangement and quantity are different.</p></div>
+<footer class="takeaway">Rows and columns get their real-world meaning from us, not from PyTorch.</footer><aside class="notes">Ask students to describe the shape of three sensors measured four times, assuming the same arrangement: (3, 4), two dimensions, twelve values. Take verbal answers. Do not introduce tensor indexing syntax or ndim/numel calls on this slide.</aside>
+</section>
+<section class="slide" data-title="Why not just use a Python list?">
+<header class="mast"><span>04 / Understanding tensors</span><span>Purpose before an API</span></header>
+<div class="body"><h2>A list stores items. A tensor supports numerical work.</h2><div class="columns"><div class="rule"><h3>Python list</h3><p>A general-purpose collection of objects, useful for organizing items.</p><p>Adding two lists joins their items together.</p><pre class="output">[1, 2] + [3, 4]
+becomes [1, 2, 3, 4]</pre></div><div class="rule"><h3>PyTorch tensor</h3><p>A numerical array with a defined shape, data type and device.</p><p>Adding equal-shaped tensors adds matching entries.</p><pre class="output">[1, 2] plus [3, 4]
+becomes [4, 6]</pre></div></div><p>Tensors also connect to accelerated computation and PyTorch's automatic differentiation tools.</p></div>
+<footer class="takeaway">The same-looking values can have different behavior depending on their container.</footer><aside class="notes">The right-hand illustration is conceptual, not literal Python list syntax. Say this clearly. Tensors are not always faster for tiny operations; their value includes efficient large numerical workloads and integration with training. Do not imply every tensor requires a GPU.</aside>
+</section>
+<section class="slide" data-title="Python, PyTorch and the notebook">
+<header class="mast"><span>05 / Our first code</span><span>Know what each tool does</span></header>
+<div class="body"><h2>Three names. Three different jobs.</h2><div class="three"><div class="rule"><h3>Python</h3><p>The programming language in which we write instructions.</p></div><div class="rule"><h3>PyTorch</h3><p>The numerical and machine-learning framework our Python program uses.</p></div><div class="rule"><h3>Google Colab</h3><p>A browser-based notebook where a connected runtime executes our Python code.</p></div></div><p class="band">A notebook contains cells. A code cell runs instructions and displays their output below it.</p><p class="small">Instructor demonstration: <a href="https://colab.research.google.com/" target="_blank" rel="noreferrer">Google Colab</a>. A standard runtime is enough for today's small calculations.</p></div>
+<footer class="takeaway">The notebook is the workspace. It is not PyTorch itself.</footer><aside class="notes">Have a notebook ready before the seminar. Run cells in order because later cells use earlier variables. PyTorch must be available in the runtime; verify import torch ahead of the demo. Save the notebook in Drive. The deck is offline, but Colab needs internet. Students can do their own setup after the talk using the handbook.</aside>
+</section>
+<section class="slide" data-title="Example 1: represent three temperatures">
+<header class="mast"><span>05 / Worked example 1</span><span>Represent, do not train</span></header>
+<div class="body"><h2>Store three temperature readings together.</h2><p>Situation: one sensor records <strong>20&deg;C, 25&deg;C and 30&deg;C</strong>. We want a tensor containing those readings.</p><div class="columns"><div class="stack"><pre class="code"><span class="key">import</span> torch
+
+readings = torch.tensor([<span class="num">20.0, 25.0, 30.0</span>])
+<span class="key">print</span>(readings)</pre><div class="reveal"><pre class="output">tensor([20., 25., 30.])</pre></div></div><dl class="explain"><dt>import torch</dt><dd>Makes PyTorch available under its Python package name, torch.</dd><dt>readings =</dt><dd>Gives the resulting tensor a name we can reuse.</dd><dt>torch.tensor([...])</dt><dd>Creates a tensor from the supplied list of numbers.</dd><dt>print(readings)</dt><dd>Displays the tensor so we can inspect it.</dd></dl></div></div>
+<footer class="takeaway"><strong>What happened?</strong> We represented data. Nothing has learned a pattern yet.</footer><aside class="notes">Type this slowly. Explain square brackets as a Python list and parentheses as a function call. The dot in torch.tensor accesses something provided by torch. Decimal values request floating-point data under the usual defaults. PyTorch's display of 20. means 20.0, not a missing value. Reveal the output only after students explain the instructions.</aside>
+</section>
+<section class="slide" data-title="Example 2: correct every reading">
+<header class="mast"><span>05 / Worked example 2</span><span>One operation, every entry</span></header>
+<div class="body"><h2>The sensor reads 2&deg;C too low.</h2><p>A calibration check found a constant error. Add <strong>2&deg;C to each reading</strong> to correct it.</p><div class="columns"><div class="stack"><pre class="code">corrected = readings + <span class="num">2</span>
+<span class="key">print</span>(corrected)</pre><p class="equation">[20 + 2, 25 + 2, 30 + 2]</p><div class="reveal"><pre class="output">tensor([22., 27., 32.])</pre></div></div><dl class="explain"><dt>readings</dt><dd>The tensor created in the previous cell.</dd><dt>+ 2</dt><dd>Adds the same number to every entry.</dd><dt>corrected =</dt><dd>Stores the result under a new name. The original readings remain unchanged.</dd><dt>Why this is useful</dt><dd>We express the operation once rather than writing a separate addition for each measurement.</dd></dl></div></div>
+<footer class="takeaway"><strong>This is a known correction rule, not machine learning.</strong></footer><aside class="notes">Ask for 20+2 first, then apply the same reasoning to the other values. General broadcasting rules come later; keep today's explanation to adding one scalar to a tensor. This assumes a known constant sensor error, not that all calibration problems are solved by adding two.</aside>
+</section>
+<section class="slide" data-title="Example 3: summarize the readings">
+<header class="mast"><span>05 / Worked example 3</span><span>Connect the code to familiar arithmetic</span></header>
+<div class="body"><h2>What was the average corrected temperature?</h2><p>We have <strong>22&deg;C, 27&deg;C and 32&deg;C</strong>. The mean adds the values and divides by how many there are.</p><p class="equation">(22 + 27 + 32) / 3 = 27</p><div class="columns"><div class="stack"><pre class="code">average = corrected.mean()
+<span class="key">print</span>(average)
+<span class="key">print</span>(average.item())</pre><div class="reveal"><pre class="output">tensor(27.)
+27.0</pre></div></div><dl class="explain"><dt>corrected.mean()</dt><dd>Calculates the mean of all values in this tensor.</dd><dt>average</dt><dd>A scalar tensor holding one result: 27.</dd><dt>average.item()</dt><dd>Extracts its single value as an ordinary Python number.</dd></dl></div></div>
+<footer class="takeaway"><strong>Many readings &rarr; one summary.</strong> A calculation returning a number is not automatically an AI prediction.</footer><aside class="notes">Tie this to the earlier scalar slide. Both printed outputs represent the same numerical value but have different types. item works only when the tensor contains one element. Avoid dim arguments or per-column averages today.</aside>
+</section>
+<section class="slide" data-title="Three properties to recognize">
+<header class="mast"><span>06 / Preparing for Friday</span><span>Vocabulary, not another coding exercise</span></header>
+<div class="body"><h2>Every tensor has an arrangement, a type and a location.</h2><div class="three"><div class="rule"><h3>Shape</h3><p>How many positions are on each axis?</p><p class="band">Our readings: <strong>(3,)</strong><br>One axis with three values.</p></div><div class="rule"><h3>Data type / dtype</h3><p>How are the numbers represented?</p><p class="band">Our readings: floating-point values, normally <strong>float32</strong>.</p></div><div class="rule"><h3>Device</h3><p>Where is the tensor stored and processed?</p><p class="band">Normally the <strong>CPU</strong> unless another device is selected.</p></div></div><p>A GPU can process many numerical operations in parallel, but today's tiny examples do not need one.</p></div>
+<footer class="takeaway">Friday we will inspect these properties in code and learn why they matter.</footer><aside class="notes">The comma in (3,) is Python's way to write a one-element tuple; it does not mean a missing second dimension. float32 uses 32 bits per value and represents many decimal values approximately. Defaults can be changed, hence normally. Do not demonstrate device transfers or type conversion today.</aside>
+</section>
+<section class="slide" data-title="What PyTorch does not do automatically">
+<header class="mast"><span>06 / A clear mental model</span><span>What remains our responsibility</span></header>
+<div class="body"><h2>Installing PyTorch does not create intelligence.</h2><div class="columns"><div class="rule"><h3>PyTorch supplies</h3><ul><li>Numerical data containers and operations.</li><li>Tools for building and training models.</li><li>Support for efficient computation on compatible hardware.</li></ul></div><div class="rule"><h3>We still decide</h3><ul><li>What problem and data the model should use.</li><li>How inputs, targets and units are represented.</li><li>How to check whether results are accurate and useful.</li></ul></div></div><p class="band">Our temperature examples demonstrate tensor calculations, not learned parameters or a trained model.</p></div>
+<footer class="takeaway">Good tools support good reasoning. They do not replace it.</footer><aside class="notes">Use this slide to prevent students from labelling every torch call as machine learning. Training requires a model and a learning procedure; tensor arithmetic is the foundation beneath that process.</aside>
+</section>
+<section class="slide dark" data-title="Check our understanding">
+<header class="mast"><span>Discuss together</span><span>Explain in your own words</span></header>
+<div class="body"><h2>Before we finish, can we explain these?</h2><div class="columns"><div class="stack"><h3>1. Is PyTorch a programming language?</h3><h3>2. What is stored in a tensor?</h3><h3>3. Did adding 2 train a model?</h3><h3>4. Why is PyTorch useful for ML?</h3></div><div class="reveal stack"><p>1. No. We use the PyTorch framework through Python.</p><p>2. Numerical values in a defined arrangement.</p><p>3. No. We applied a rule we already knew.</p><p>4. It supplies numerical computation, model tools, gradients and parameter updates.</p></div></div></div>
+<footer class="takeaway">Understanding these ideas matters more today than memorizing function names.</footer><aside class="notes">Let students answer before revealing. Ask for a real engineering example that might need learning, and one that only needs a known formula. Clarify any confusion before assigning reading. This is oral discussion, not a submission.</aside>
+</section>
+<section class="slide lime" data-title="Today and Friday">
+<header class="mast"><span>Learning in two sessions</span><span>A manageable next step</span></header>
+<div class="body"><h2>Today: understand the foundation.<br>Friday: continue the basics.</h2><div class="columns"><div class="rule"><h3>After today's seminar</h3><p>Use the handbook as a reference for setup and creating a first tensor. Revisit today's three temperature calculations.</p><p>Be able to explain what each line does. Note anything that is still unclear.</p></div><div class="rule"><h3>In Friday's class</h3><p>Continue with tensor properties, creation, selection and operations, building from today's ideas.</p><p>Work through guided examples before attempting the assigned exercises.</p></div></div><p class="lead">No Wednesday submission. More advanced handbook examples are not assumed knowledge from today's talk.</p></div>
+<footer class="takeaway">Bring questions. We will continue from this foundation.</footer><aside class="notes">The existing handbook contains more material than today's introduction. Do not tell students they must master all its operations tonight. The portal's existing Friday release and submission controls have not changed. Agree the detailed Friday pacing separately; do not promise to finish model training before students understand tensors.</aside>
+</section>
+<section class="slide dark" data-title="Questions and recap">
+<header class="mast"><span>Arunachala / Applied AI</span><span>First-day recap</span></header>
+<div class="body"><p class="kicker">One idea to take away</p><h1>PyTorch gives us<br>the tools to compute<br>and to learn.</h1><p class="lead">Tensors represent data. Operations calculate with it.<br>Training tools help models learn from examples.</p><p>Today we understood the tool and made our first calculations.</p><h3>Questions?</h3></div>
+<footer class="takeaway">Continue PyTorch basics on Friday.</footer><aside class="notes">Close by inviting conceptual questions. Useful prompts: What is the difference between PyTorch and a model? Between training and inference? Between a value and the physical quantity it represents? Keep syntax-heavy follow-ups for Friday.</aside>
+</section>
+</main>
+<nav class="toolbar" aria-label="Presentation controls" hidden>
+<button id="previous" title="Previous step (Left arrow)" aria-label="Previous step">&larr;</button>
+<span class="count" id="count" aria-live="polite"></span>
+<button id="next" title="Next step (Right arrow or Space)" aria-label="Next step">&rarr;</button>
+<select id="jump" aria-label="Go to slide"></select>
+<button id="notes" title="Presenter notes (N); visible on this screen" aria-label="Open presenter notes">N</button>
+<button id="fullscreen" title="Fullscreen (F)" aria-label="Toggle fullscreen" aria-pressed="false">&#x26F6;</button>
+<button id="print" title="Print all slides or save PDF" aria-label="Print all slides">&#x2399;</button>
+</nav>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<dialog id="notes-dialog" aria-labelledby="notes-title"><h2 id="notes-title">Presenter notes</h2><p id="notes-content"></p><button id="close-notes">Close</button></dialog>
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  const toolbar = document.querySelector('.toolbar');
+  const previous = document.getElementById('previous');
+  const next = document.getElementById('next');
+  const jump = document.getElementById('jump');
+  const counter = document.getElementById('count');
+  const progress = document.getElementById('progress');
+  const notesDialog = document.getElementById('notes-dialog');
+  const fullscreen = document.getElementById('fullscreen');
+  let current = 0;
+  let revealed = 0;
+  const requestedSlide = () => {
+    const value = Number(location.hash.slice(1));
+    return Number.isInteger(value) && value >= 1 && value <= slides.length ? value - 1 : 0;
+  };
+  slides.forEach((slide, index) => {
+    slide.setAttribute('aria-label', `Slide ${index + 1}: ${slide.dataset.title}`);
+    const option = document.createElement('option');
+    option.value = String(index);
+    option.textContent = `${String(index + 1).padStart(2, '0')} / ${slide.dataset.title}`;
+    jump.append(option);
+  });
+  function render() {
+    slides.forEach((slide, index) => {
+      slide.hidden = index !== current;
+      slide.classList.toggle('active', index === current);
+    });
+    const answers = [...slides[current].querySelectorAll('.reveal')];
+    answers.forEach((answer, index) => {
+      answer.classList.toggle('shown', index < revealed);
+      answer.setAttribute('aria-hidden', String(index >= revealed));
+    });
+    previous.disabled = current === 0 && revealed === 0;
+    next.disabled = current === slides.length - 1 && revealed === answers.length;
+    counter.textContent = `${current + 1} / ${slides.length}`;
+    jump.value = String(current);
+    progress.style.width = `${(current + 1) / slides.length * 100}%`;
+    document.title = `${slides[current].dataset.title} | PyTorch Seminar`;
+  }
+  function goTo(index, showAnswers = false) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    revealed = showAnswers ? slides[current].querySelectorAll('.reveal').length : 0;
+    try { history.replaceState(null, '', `#${current + 1}`); } catch { location.hash = String(current + 1); }
+    render();
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+  function advance() {
+    if (revealed < slides[current].querySelectorAll('.reveal').length) { revealed++; render(); }
+    else if (current < slides.length - 1) goTo(current + 1);
+  }
+  function retreat() {
+    if (revealed > 0) { revealed--; render(); }
+    else if (current > 0) goTo(current - 1, true);
+  }
+  function showNotes() {
+    document.getElementById('notes-title').textContent = `Slide ${current + 1} / ${slides[current].dataset.title}`;
+    document.getElementById('notes-content').textContent = slides[current].querySelector('.notes').textContent;
+    notesDialog.showModal();
+  }
+  async function toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch { fullscreen.title = 'Fullscreen unavailable here; use your browser fullscreen command.'; }
+  }
+  previous.addEventListener('click', retreat);
+  next.addEventListener('click', advance);
+  jump.addEventListener('change', () => { goTo(Number(jump.value)); jump.blur(); });
+  document.getElementById('notes').addEventListener('click', showNotes);
+  document.getElementById('close-notes').addEventListener('click', () => notesDialog.close());
+  fullscreen.addEventListener('click', toggleFullscreen);
+  document.getElementById('print').addEventListener('click', () => window.print());
+  document.addEventListener('fullscreenchange', () => fullscreen.setAttribute('aria-pressed', String(Boolean(document.fullscreenElement))));
+  window.addEventListener('hashchange', () => goTo(requestedSlide()));
+  document.addEventListener('keydown', event => {
+    if (notesDialog.open) {
+      if (event.key === 'Escape') { event.preventDefault(); notesDialog.close(); }
+      return;
+    }
+    if (event.altKey || event.ctrlKey || event.metaKey || /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName)) return;
+    if (event.key === ' ' && /^(BUTTON|A)$/.test(event.target.tagName)) return;
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); advance(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) { event.preventDefault(); retreat(); }
+    else if (event.key === 'Home') { event.preventDefault(); goTo(0); }
+    else if (event.key === 'End') { event.preventDefault(); goTo(slides.length - 1); }
+    else if (event.key.toLowerCase() === 'n') { event.preventDefault(); showNotes(); }
+    else if (event.key.toLowerCase() === 'f') { event.preventDefault(); toggleFullscreen(); }
+  });
+  toolbar.hidden = false;
+  goTo(requestedSlide());
+})();
+</script>
+</body>
+</html>

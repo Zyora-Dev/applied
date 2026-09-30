@@ -1,273 +1,263 @@
-import re
-from datetime import date, datetime
-from typing import Annotated, Literal
+from datetime import date, datetime, time, timedelta, timezone
+import os
+import secrets
 from urllib.parse import urlsplit
+from typing import Annotated, Literal
 
-import psycopg
-from email_validator import validate_email
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from psycopg.rows import dict_row
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
+from psycopg.errors import UniqueViolation
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, SecretStr, field_validator
 
-from auth import AdminResponse, password_hasher, require_admin
+from admin_auth import PRIVATE_HEADERS, password_hasher, require_admin, token_digest
 from database import connect_database
+from email_settings import DeliveryStatus, get_delivery_settings, send_account_email, send_invitation_email
 
 
-COLLEGE = "Arunachala Hitech Engineering College"
-Admin = Annotated[AdminResponse, Depends(require_admin)]
-router = APIRouter(prefix="/admin/students", tags=["Students"])
-
-
-def initialize_student_tables(connection: psycopg.Connection) -> None:
-    connection.execute(
-        """
-        CREATE TABLE IF NOT EXISTS students (
-            id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            admin_id BIGINT NOT NULL REFERENCES admins(id),
-            name TEXT NOT NULL,
-            student_id TEXT NOT NULL,
-            email TEXT NOT NULL,
-            mobile TEXT NOT NULL,
-            college TEXT NOT NULL CHECK (college = 'Arunachala Hitech Engineering College'),
-            degree TEXT NOT NULL CHECK (degree IN ('B.E', 'B.Tech')),
-            stream TEXT NOT NULL CHECK (stream IN ('AI&DS', 'ECE', 'CSE', 'EEE', 'Mech', 'Civil', 'Others')),
-            github_url TEXT,
-            linkedin_url TEXT,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE (admin_id, student_id),
-            UNIQUE (admin_id, email)
-        )
-        """
-    )
-    connection.execute("CREATE INDEX IF NOT EXISTS students_admin_created_idx ON students (admin_id, created_at DESC, id DESC)")
-    connection.execute("ALTER TABLE students ADD COLUMN IF NOT EXISTS password_hash TEXT")
-    connection.execute("""CREATE TABLE IF NOT EXISTS student_week_progress (
-        student_id BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-        week INTEGER NOT NULL CHECK (week BETWEEN 1 AND 4),
-        status TEXT NOT NULL CHECK (status IN ('not_started', 'in_progress', 'completed')),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (student_id, week)
-    )""")
-
-
-class WeekProgressInput(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    status: Literal["not_started", "in_progress", "completed"]
-
-
-def read_week_progress(connection: psycopg.Connection, student_id: int) -> list[dict]:
-    with connection.cursor(row_factory=dict_row) as cursor:
-        return cursor.execute("""SELECT weeks.week,
-            COALESCE(progress.status, 'not_started') AS status, progress.updated_at
-            FROM generate_series(1, 4) AS weeks(week)
-            LEFT JOIN student_week_progress AS progress
-            ON progress.week = weeks.week AND progress.student_id = %s
-            ORDER BY weeks.week""", (student_id,)).fetchall()
-
-
-@router.get("/{record_id}/progress")
-def get_student_progress(record_id: int, admin: Admin, response: Response):
-    response.headers["Cache-Control"] = "no-store"
-    with connect_database() as connection:
-        if connection.execute("SELECT id FROM students WHERE id=%s AND admin_id=%s", (record_id, admin.id)).fetchone() is None:
-            raise HTTPException(404, "Student not found.")
-        return {"weeks": read_week_progress(connection, record_id)}
-
-
-@router.put("/{record_id}/progress/{week}")
-def update_student_progress(record_id: int, week: int, payload: WeekProgressInput, admin: Admin, response: Response):
-    if week not in range(1, 5):
-        raise HTTPException(422, "Week must be between 1 and 4.")
-    response.headers["Cache-Control"] = "no-store"
-    with connect_database() as connection:
-        if connection.execute("SELECT id FROM students WHERE id=%s AND admin_id=%s FOR UPDATE", (record_id, admin.id)).fetchone() is None:
-            raise HTTPException(404, "Student not found.")
-        connection.execute("""INSERT INTO student_week_progress (student_id, week, status)
-            VALUES (%s, %s, %s) ON CONFLICT (student_id, week)
-            DO UPDATE SET status=EXCLUDED.status, updated_at=CURRENT_TIMESTAMP""", (record_id, week, payload.status))
-        return {"weeks": read_week_progress(connection, record_id)}
+router = APIRouter(prefix="/admin/students", tags=["Student management"])
+Admin = Annotated[dict, Depends(require_admin)]
+FIELDS = "id, name, student_id, email, mobile, college, degree, year, github, linkedin, is_active, gender, created_at, updated_at"
+INDIA = timezone(timedelta(hours=5, minutes=30))
+Gender = Literal["Male", "Female", "Other", "Prefer not to say"]
 
 
 class StudentInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1, max_length=150)
-    student_id: str = Field(min_length=1, max_length=80)
-    email: str = Field(min_length=1, max_length=320)
-    mobile: str = Field(min_length=7, max_length=30)
-    college: Literal["Arunachala Hitech Engineering College"]
-    degree: Literal["B.E", "B.Tech"]
-    stream: Literal["AI&DS", "ECE", "CSE", "EEE", "Mech", "Civil", "Others"]
-    github_url: str | None = Field(default=None, max_length=500)
-    linkedin_url: str | None = Field(default=None, max_length=500)
+    student_id: str = Field(min_length=1, max_length=64)
+    email: EmailStr = Field(max_length=254)
+    mobile: str = Field(min_length=3, max_length=30, pattern=r"^[+0-9() .-]+$")
+    college: str = Field(min_length=1, max_length=200)
+    degree: str = Field(min_length=1, max_length=150)
+    year: int = Field(ge=1, le=20, strict=True)
+    github: HttpUrl | None = Field(default=None, max_length=500)
+    linkedin: HttpUrl | None = Field(default=None, max_length=500)
+    is_active: bool = Field(default=True, strict=True)
+    gender: Gender | None = None
 
-    @field_validator("*", mode="before")
+    @field_validator("name", "student_id", "email", "mobile", "college", "degree", mode="before")
     @classmethod
-    def strip_record_fields(cls, value, info):
-        return value.strip() if isinstance(value, str) and info.field_name != "password" else value
+    def strip_text(cls, value):
+        return value.strip() if isinstance(value, str) else value
 
-    @field_validator("student_id")
+    @field_validator("email", mode="after")
     @classmethod
-    def normalize_student_id(cls, value: str) -> str:
-        return value.upper()
+    def normalize_email(cls, value):
+        return str(value).lower()
 
-    @field_validator("email")
+    @field_validator("github", "linkedin", mode="before")
     @classmethod
-    def normalize_email(cls, value: str) -> str:
-        return validate_email(value, check_deliverability=False).normalized.lower()
+    def optional_link(cls, value):
+        return value.strip() or None if isinstance(value, str) else value
 
-    @field_validator("mobile")
+    @field_validator("github", "linkedin")
     @classmethod
-    def normalize_mobile(cls, value: str) -> str:
-        value = re.sub(r"[\s()-]", "", value)
-        if not re.fullmatch(r"\+?[0-9]{7,15}", value):
-            raise ValueError("Enter a mobile number with 7 to 15 digits and an optional country code.")
-        return value
-
-    @field_validator("github_url", "linkedin_url")
-    @classmethod
-    def validate_profile_url(cls, value: str | None, info) -> str | None:
-        if not value:
-            return None
-        parsed = urlsplit(value)
-        domain = "github.com" if info.field_name == "github_url" else "linkedin.com"
-        if (parsed.scheme != "https" or parsed.hostname not in (domain, "www." + domain)
-                or parsed.username or parsed.password or parsed.port not in (None, 443)
-                or not parsed.path.strip("/") or any(character.isspace() for character in value)):
-            raise ValueError(f"Enter an HTTPS profile link on {domain}.")
+    def secure_link(cls, value):
+        if value is not None and (value.scheme != "https" or value.username or value.password):
+            raise ValueError("Use an HTTPS URL without credentials.")
         return value
 
 
 class StudentCreate(StudentInput):
-    password: SecretStr = Field(min_length=12, max_length=1024)
+    password: SecretStr = Field(min_length=8, max_length=128)
 
 
-class StudentUpdate(StudentInput):
-    password: SecretStr | None = Field(default=None, min_length=12, max_length=1024)
+class PasswordReset(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    password: SecretStr = Field(min_length=8, max_length=128)
 
 
-class StudentResponse(StudentInput):
+class StudentRecord(BaseModel):
     id: int
-    password_set: bool
+    name: str
+    student_id: str
+    email: str
+    mobile: str
+    college: str
+    degree: str
+    year: int
+    github: str | None
+    linkedin: str | None
+    is_active: bool
+    gender: Gender | None = None
     created_at: datetime
     updated_at: datetime
 
 
 class StudentList(BaseModel):
-    items: list[StudentResponse]
+    items: list[StudentRecord]
     total: int
     page: int
     page_size: int
 
 
-STUDENT_COLUMNS = "id, name, student_id, email, mobile, college, degree, stream, github_url, linkedin_url, created_at, updated_at, (password_hash IS NOT NULL) AS password_set"
+class StudentCreated(StudentRecord):
+    email_delivery: DeliveryStatus
 
 
-@router.delete("/{record_id}")
-def delete_student(record_id: int, admin: Admin, response: Response):
-    response.headers["Cache-Control"] = "no-store"
-    try:
-        with connect_database() as connection:
-            student = connection.execute(
-                "DELETE FROM students WHERE id=%s AND admin_id=%s RETURNING id",
-                (record_id, admin.id),
-            ).fetchone()
-            if student is None:
-                raise HTTPException(404, "Student not found.")
-    except psycopg.errors.ForeignKeyViolation:
-        raise HTTPException(409, "This student has linked records and cannot be deleted.") from None
-    return {"deleted": True}
+def missing_student():
+    return HTTPException(404, "Student not found.", headers=PRIVATE_HEADERS)
 
 
-@router.get("/summary")
-def student_summary(admin: Admin, response: Response):
-    response.headers["Cache-Control"] = "no-store"
-    with connect_database() as connection:
-        with connection.cursor(row_factory=dict_row) as cursor:
-            counts = cursor.execute(
-                """SELECT COUNT(*) AS total,
-                    COUNT(*) FILTER (WHERE degree = 'B.E') AS be,
-                    COUNT(*) FILTER (WHERE degree = 'B.Tech') AS btech
-                    FROM students WHERE admin_id = %s""", (admin.id,),
-            ).fetchone()
-            streams = cursor.execute(
-                "SELECT stream, COUNT(*) AS total FROM students WHERE admin_id = %s GROUP BY stream ORDER BY total DESC, stream",
-                (admin.id,),
-            ).fetchall()
-    return {**counts, "streams": streams}
+def duplicate_student():
+    return HTTPException(409, "Student ID or email is already in use, including archived accounts.", headers=PRIVATE_HEADERS)
 
 
-@router.get("", response_model=StudentList)
+def student_values(payload: StudentInput):
+    return (
+        payload.name, payload.student_id, str(payload.email), payload.mobile,
+        payload.college, payload.degree, payload.year,
+        str(payload.github) if payload.github else None,
+        str(payload.linkedin) if payload.linkedin else None, payload.is_active,
+        payload.gender,
+    )
+
+
+@router.get("/", response_model=StudentList)
 def list_students(
     admin: Admin, response: Response,
-    search: str = Query(default="", max_length=150),
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=10, ge=1, le=100),
-    date_from: date | None = None,
-    date_to: date | None = None,
-) -> StudentList:
+    page: int = Query(default=1, ge=1, le=1000000),
+    page_size: int = Query(default=20, ge=1, le=100),
+    search: str = Query(default="", max_length=100),
+    date_from: date | None = None, date_to: date | None = None,
+):
     if date_from and date_to and date_from > date_to:
-        raise HTTPException(422, "Start date must not be later than end date.")
-    response.headers["Cache-Control"] = "no-store"
-    conditions = ["admin_id = %s"]
-    parameters = [admin.id]
+        raise HTTPException(422, "Start date must not be after end date.", headers=PRIVATE_HEADERS)
+    if date_to == date.max:
+        raise HTTPException(422, "End date is out of range.", headers=PRIVATE_HEADERS)
+    conditions = ["admin_id = %s", "deleted_at IS NULL"]
+    values = [admin["id"]]
     if search.strip():
-        conditions.append("(name ILIKE %s OR student_id ILIKE %s OR email ILIKE %s)")
         term = search.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-        parameters.extend([f"%{term}%"] * 3)
+        conditions.append("concat_ws(' ', name, student_id, email, college, degree) ILIKE %s")
+        values.append(f"%{term}%")
     if date_from:
-        conditions.append("created_at >= (%s::date::timestamp AT TIME ZONE 'Asia/Kolkata')")
-        parameters.append(date_from)
+        conditions.append("created_at >= %s")
+        values.append(datetime.combine(date_from, time.min, INDIA))
     if date_to:
-        conditions.append("created_at < ((%s::date + 1)::timestamp AT TIME ZONE 'Asia/Kolkata')")
-        parameters.append(date_to)
+        conditions.append("created_at < %s")
+        values.append(datetime.combine(date_to + timedelta(days=1), time.min, INDIA))
     where = " AND ".join(conditions)
     with connect_database() as connection:
-        with connection.cursor(row_factory=dict_row) as cursor:
-            total = cursor.execute(f"SELECT COUNT(*) AS total FROM students WHERE {where}", parameters).fetchone()["total"]
-            items = cursor.execute(
-                f"SELECT {STUDENT_COLUMNS} FROM students WHERE {where} ORDER BY created_at DESC, id DESC LIMIT %s OFFSET %s",
-                [*parameters, page_size, (page - 1) * page_size],
-            ).fetchall()
-    return StudentList(items=items, total=total, page=page, page_size=page_size)
+        total = connection.execute(f"SELECT count(*) AS total FROM students WHERE {where}", values).fetchone()["total"]
+        records = connection.execute(
+            f"SELECT {FIELDS} FROM students WHERE {where} ORDER BY created_at DESC, id DESC LIMIT %s OFFSET %s",
+            [*values, page_size, (page - 1) * page_size],
+        ).fetchall()
+    response.headers.update(PRIVATE_HEADERS)
+    return {"items": records, "total": total, "page": page, "page_size": page_size}
 
 
-@router.post("", response_model=StudentResponse, status_code=201)
+@router.post("/", response_model=StudentCreated, status_code=201)
 def create_student(payload: StudentCreate, admin: Admin, response: Response):
-    response.headers["Cache-Control"] = "no-store"
+    hashed = password_hasher.hash(payload.password.get_secret_value())
     try:
         with connect_database() as connection:
-            with connection.transaction():
-                with connection.cursor(row_factory=dict_row) as cursor:
-                    return cursor.execute(
-                        f"""INSERT INTO students
-                        (admin_id, name, student_id, email, mobile, college, degree, stream, github_url, linkedin_url, password_hash)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING {STUDENT_COLUMNS}""",
-                        [admin.id, *payload.model_dump(exclude={"password"}).values(), password_hasher.hash(payload.password.get_secret_value())],
-                    ).fetchone()
-    except psycopg.errors.UniqueViolation:
-        raise HTTPException(409, "A student with this student ID or email already exists.") from None
+            mail_settings = get_delivery_settings(connection, admin["id"])
+            record = connection.execute(
+                f"""INSERT INTO students
+                (name, student_id, email, mobile, college, degree, year, github, linkedin, is_active, gender, password_hash, admin_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING {FIELDS}""",
+                (*student_values(payload), hashed, admin["id"]),
+            ).fetchone()
+    except UniqueViolation:
+        raise duplicate_student() from None
+    record["email_delivery"] = send_account_email(mail_settings, payload.name, str(payload.email), payload.password.get_secret_value(), "student")
+    response.headers.update(PRIVATE_HEADERS)
+    return record
 
 
-@router.put("/{record_id}", response_model=StudentResponse)
-def update_student(record_id: int, payload: StudentUpdate, admin: Admin, response: Response):
-    response.headers["Cache-Control"] = "no-store"
+@router.get("/{record_id}", response_model=StudentRecord)
+def get_student(record_id: int, admin: Admin, response: Response):
+    with connect_database() as connection:
+        record = connection.execute(
+            f"SELECT {FIELDS} FROM students WHERE id = %s AND admin_id = %s AND deleted_at IS NULL",
+            (record_id, admin["id"]),
+        ).fetchone()
+    if record is None:
+        raise missing_student()
+    response.headers.update(PRIVATE_HEADERS)
+    return record
+
+
+@router.post("/{record_id}/invitation")
+def invite_student(record_id: int, admin: Admin, response: Response):
+    origin = os.environ.get("STUDENT_APP_ORIGIN", "").rstrip("/")
+    parsed = urlsplit(origin)
+    local = parsed.scheme == "http" and parsed.hostname in ("localhost", "127.0.0.1") and os.environ.get("APP_ENV", "local") == "local"
+    if not origin or (parsed.scheme != "https" and not local) or not parsed.netloc or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:
+        raise HTTPException(503, "Student invitation URL is not configured.", headers=PRIVATE_HEADERS)
+    token = secrets.token_urlsafe(32)
+    digest = token_digest(token)
+    with connect_database() as connection:
+        record = connection.execute("SELECT * FROM students WHERE id=%s AND admin_id=%s AND deleted_at IS NULL FOR UPDATE", (record_id, admin["id"])).fetchone()
+        if record is None:
+            raise missing_student()
+        if record["is_active"]:
+            raise HTTPException(409, "This student already has an active account.", headers=PRIVATE_HEADERS)
+        settings = get_delivery_settings(connection, admin["id"])
+        if not settings:
+            raise HTTPException(409, "Configure email settings before sending invitations.", headers=PRIVATE_HEADERS)
+        recent = connection.execute("SELECT 1 FROM student_invitations WHERE student_id=%s AND created_at > clock_timestamp() - interval '60 seconds'", (record_id,)).fetchone()
+        if recent:
+            raise HTTPException(429, "Wait one minute before resending this invitation.", headers={**PRIVATE_HEADERS, "Retry-After": "60"})
+        invitation = connection.execute(
+            """INSERT INTO student_invitations (student_id, token_hash, student_updated_at, expires_at)
+            VALUES (%s, %s, %s, clock_timestamp() + interval '24 hours')
+            ON CONFLICT (student_id) DO UPDATE SET token_hash=EXCLUDED.token_hash,
+            student_updated_at=EXCLUDED.student_updated_at, created_at=clock_timestamp(), expires_at=EXCLUDED.expires_at
+            RETURNING expires_at""", (record_id, digest, record["updated_at"]),
+        ).fetchone()
+    delivery = send_invitation_email(settings, record["name"], record["email"], f"{origin}/student/setup-password#token={token}")
+    if delivery != "accepted":
+        with connect_database() as connection:
+            connection.execute("DELETE FROM student_invitations WHERE student_id=%s AND token_hash=%s", (record_id, digest))
+    response.headers.update(PRIVATE_HEADERS)
+    return {"id": record_id, "email_delivery": delivery, "expires_at": invitation["expires_at"] if delivery == "accepted" else None}
+
+
+@router.put("/{record_id}", response_model=StudentRecord)
+def update_student(record_id: int, payload: StudentInput, admin: Admin, response: Response):
     try:
         with connect_database() as connection:
-            with connection.transaction():
-                with connection.cursor(row_factory=dict_row) as cursor:
-                    student = cursor.execute(
-                        f"""UPDATE students SET name=%s, student_id=%s, email=%s, mobile=%s,
-                        college=%s, degree=%s, stream=%s, github_url=%s, linkedin_url=%s,
-                        password_hash=COALESCE(%s, password_hash), updated_at=CURRENT_TIMESTAMP
-                        WHERE id=%s AND admin_id=%s RETURNING {STUDENT_COLUMNS}""",
-                        [*payload.model_dump(exclude={"password"}).values(),
-                         password_hasher.hash(payload.password.get_secret_value()) if payload.password is not None else None,
-                         record_id, admin.id],
-                    ).fetchone()
-                    if student is None:
-                        raise HTTPException(404, "Student not found.")
-                    return student
-    except psycopg.errors.UniqueViolation:
-        raise HTTPException(409, "A student with this student ID or email already exists.") from None
+            record = connection.execute(
+                f"""UPDATE students SET name=%s, student_id=%s, email=%s, mobile=%s, college=%s,
+                degree=%s, year=%s, github=%s, linkedin=%s, is_active=%s, gender=%s
+                WHERE id=%s AND admin_id=%s AND deleted_at IS NULL RETURNING {FIELDS}""",
+                (*student_values(payload), record_id, admin["id"]),
+            ).fetchone()
+    except UniqueViolation:
+        raise duplicate_student() from None
+    if record is None:
+        raise missing_student()
+    response.headers.update(PRIVATE_HEADERS)
+    return record
+
+
+@router.post("/{record_id}/password", status_code=204)
+def reset_password(record_id: int, payload: PasswordReset, admin: Admin):
+    with connect_database() as connection:
+        record = connection.execute(
+            "SELECT id FROM students WHERE id=%s AND admin_id=%s AND deleted_at IS NULL FOR UPDATE",
+            (record_id, admin["id"]),
+        ).fetchone()
+        if record is None:
+            raise missing_student()
+        connection.execute(
+            "UPDATE students SET password_hash=%s WHERE id=%s AND admin_id=%s",
+            (password_hasher.hash(payload.password.get_secret_value()), record_id, admin["id"]),
+        )
+    return Response(status_code=204, headers=PRIVATE_HEADERS)
+
+
+@router.delete("/{record_id}", status_code=204)
+def delete_student(record_id: int, admin: Admin):
+    with connect_database() as connection:
+        record = connection.execute(
+            """UPDATE students SET deleted_at=clock_timestamp(), is_active=FALSE
+            WHERE id=%s AND admin_id=%s AND deleted_at IS NULL RETURNING id""",
+            (record_id, admin["id"]),
+        ).fetchone()
+    if record is None:
+        raise missing_student()
+    return Response(status_code=204, headers=PRIVATE_HEADERS)

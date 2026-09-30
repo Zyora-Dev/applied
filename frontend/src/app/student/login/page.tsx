@@ -1,11 +1,8 @@
-import { redirect } from "next/navigation";
-import { AuthShell } from "@/components/auth-shell";
-import { LoginForm } from "@/components/login-form";
-import { getStudent } from "@/lib/student-session";
+import type { Metadata } from "next";
+import { StudentLogin } from "@/components/student-login";
 
-export const metadata = { title: "Student sign in | Applied AI", description: "Applied AI student sign in." };
+export const metadata: Metadata = { title: "Student Sign In | Applied AI", robots: { index: false, follow: false } };
 
-export default async function StudentLoginPage() {
-  if (await getStudent()) redirect("/student");
-  return <AuthShell audience="student"><LoginForm audience="student" /></AuthShell>;
+export default function StudentLoginPage() {
+  return <StudentLogin />;
 }

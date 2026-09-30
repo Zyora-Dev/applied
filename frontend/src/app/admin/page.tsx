@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { AdminDashboard } from "@/components/admin-dashboard";
-import { getAdmin } from "@/lib/admin-session";
+import { requireAdmin } from "@/lib/admin-session";
 
-export const metadata: Metadata = { title: "Dashboard | Applied AI" };
+export const metadata: Metadata = {
+  title: "Dashboard | Applied AI",
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminPage() {
-  const admin = await getAdmin();
-  if (!admin) redirect("/admin/login");
-  return <AdminDashboard email={admin.email} />;
+  const admin = await requireAdmin();
+  return <AdminDashboard admin={admin} />;
 }

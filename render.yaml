@@ -14,6 +14,24 @@ services:
         value: 3.13.14
       - key: PORT
         value: "10000"
+      - key: APP_ENV
+        value: production
+      - key: STUDENT_APP_ORIGIN
+        sync: false
+      - key: EMAIL_SETTINGS_KEY
+        sync: false
+      - key: GOOGLE_DRIVE_ENCRYPTION_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GOOGLE_PICKER_API_KEY
+        sync: false
+      - key: GOOGLE_PROJECT_NUMBER
+        sync: false
       - key: DATABASE_URL
         fromDatabase:
           name: applied-ai-db
@@ -34,6 +52,8 @@ services:
         value: "22"
       - key: NODE_ENV
         value: production
+      - key: APP_ORIGIN
+        sync: false
       - key: BACKEND_HOSTPORT
         fromService:
           name: applied-ai-backend
@@ -44,7 +64,7 @@ databases:
   - name: applied-ai-db
     region: singapore
     plan: 0.1c-256mb
-    diskSizeGB: 1
+    diskSizeGB: 35
     databaseName: applied_ai
     user: applied_ai
     ipAllowList: []

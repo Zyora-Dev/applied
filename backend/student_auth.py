@@ -1,160 +1,166 @@
-import hashlib
-import os
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from typing import Annotated
 
-import psycopg
 from argon2.exceptions import InvalidHashError, VerificationError
-from email_validator import EmailNotValidError, validate_email
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from psycopg.rows import dict_row
-from pydantic import BaseModel
+from fastapi.security import HTTPAuthorizationCredentials
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
-from auth import Credentials, LoginRequest, SESSION_SECONDS, dummy_password_hash, password_hasher, session_hash, unauthorized
+from admin_auth import LoginInput, PasswordChangeInput, PRIVATE_HEADERS, bearer, check_login_limit, dummy_password_hash, password_hasher, token_digest, unauthorized
 from database import connect_database
-from students import STUDENT_COLUMNS, StudentCreate, StudentResponse, read_week_progress
 
 
-router = APIRouter(prefix="/student", tags=["Student access"])
+router = APIRouter(prefix="/student", tags=["Student authentication"])
 
 
-def initialize_student_auth_tables(connection: psycopg.Connection) -> None:
-    connection.execute("""CREATE TABLE IF NOT EXISTS student_sessions (
-        token_hash TEXT PRIMARY KEY,
-        student_id BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-        student_updated_at TIMESTAMPTZ NOT NULL,
-        expires_at TIMESTAMPTZ NOT NULL
-    )""")
-    connection.execute("CREATE INDEX IF NOT EXISTS student_sessions_student_idx ON student_sessions (student_id)")
-    connection.execute("""CREATE TABLE IF NOT EXISTS student_auth_limits (
-        client_key TEXT PRIMARY KEY,
-        window_started TIMESTAMPTZ NOT NULL,
-        attempts INTEGER NOT NULL
-    )""")
+class InvitationInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    token: SecretStr = Field(min_length=43, max_length=43)
 
 
-def enrollment_admin(connection: psycopg.Connection) -> int:
-    configured = os.environ.get("STUDENT_REGISTRATION_ADMIN_ID", "").strip()
-    if configured:
-        if not configured.isascii() or not configured.isdigit() or len(configured) > 18:
-            raise HTTPException(503, "Student access is not configured.")
-        owners = connection.execute("SELECT id FROM admins WHERE id=%s", (int(configured),)).fetchall()
-    else:
-        owners = connection.execute("SELECT id FROM admins ORDER BY id LIMIT 2").fetchall()
-    if len(owners) != 1:
-        raise HTTPException(503, "Student access is not configured.")
-    return owners[0][0]
+class PasswordSetupInput(InvitationInput):
+    password: SecretStr = Field(min_length=8, max_length=128)
+    confirm_password: SecretStr = Field(min_length=8, max_length=128)
 
 
-def rate_limit(request: Request, action: str, limit: int) -> None:
-    host = request.client.host if request.client else "unknown"
-    client_key = hashlib.sha256(f"{action}:{host}".encode()).hexdigest()
+def valid_invitation(connection, token):
+    digest = token_digest(token)
+    student = connection.execute(
+        """SELECT students.* FROM students JOIN student_invitations ON student_invitations.student_id=students.id
+        WHERE token_hash=%s FOR UPDATE OF students""", (digest,),
+    ).fetchone()
+    invitation = connection.execute(
+        """SELECT expires_at FROM student_invitations WHERE token_hash=%s
+        AND expires_at > clock_timestamp() AND student_updated_at=%s""",
+        (digest, student["updated_at"] if student else None),
+    ).fetchone()
+    if not student or not invitation or student["is_active"] or student["deleted_at"] is not None:
+        raise HTTPException(400, "This invitation is invalid or expired. Ask your administrator for a new invitation.", headers=PRIVATE_HEADERS)
+    return student, invitation
+
+
+@router.post("/invitation")
+def check_invitation(payload: InvitationInput, request: Request, response: Response):
+    check_login_limit(request, token_digest(payload.token.get_secret_value()), "invitation:", ip_limit=300)
     with connect_database() as connection:
-        connection.execute("DELETE FROM student_auth_limits WHERE window_started < CURRENT_TIMESTAMP - INTERVAL '1 day'")
-        attempts = connection.execute("""INSERT INTO student_auth_limits (client_key, window_started, attempts)
-            VALUES (%s, CURRENT_TIMESTAMP, 1)
-            ON CONFLICT (client_key) DO UPDATE SET
-                attempts = CASE WHEN student_auth_limits.window_started <= CURRENT_TIMESTAMP - INTERVAL '1 minute'
-                    THEN 1 ELSE student_auth_limits.attempts + 1 END,
-                window_started = CASE WHEN student_auth_limits.window_started <= CURRENT_TIMESTAMP - INTERVAL '1 minute'
-                    THEN CURRENT_TIMESTAMP ELSE student_auth_limits.window_started END
-            RETURNING attempts""", (client_key,)).fetchone()[0]
-    if attempts > limit:
-        raise HTTPException(429, "Too many attempts. Please try again in a minute.", headers={"Retry-After": "60", "Cache-Control": "no-store"})
+        student, invitation = valid_invitation(connection, payload.token.get_secret_value())
+    response.headers.update(PRIVATE_HEADERS)
+    return {"name": student["name"], "email": student["email"], "expires_at": invitation["expires_at"]}
 
 
-class StudentLoginResponse(BaseModel):
+@router.post("/setup-password", status_code=204)
+def setup_password(payload: PasswordSetupInput, request: Request):
+    check_login_limit(request, token_digest(payload.token.get_secret_value()), "invitation:", ip_limit=300)
+    if payload.password.get_secret_value() != payload.confirm_password.get_secret_value():
+        raise HTTPException(422, "Passwords do not match.", headers=PRIVATE_HEADERS)
+    with connect_database() as connection:
+        student, _ = valid_invitation(connection, payload.token.get_secret_value())
+        connection.execute("UPDATE students SET password_hash=%s, is_active=TRUE WHERE id=%s", (password_hasher.hash(payload.password.get_secret_value()), student["id"]))
+        connection.execute("DELETE FROM student_invitations WHERE student_id=%s", (student["id"],))
+        connection.execute("DELETE FROM student_sessions WHERE student_id=%s", (student["id"],))
+    return Response(status_code=204, headers=PRIVATE_HEADERS)
+
+
+class StudentAccount(BaseModel):
+    id: int
+    name: str
+    email: str
+    student_id: str
+    college: str
+    degree: str
+    year: int
+
+
+class StudentLoginResult(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    expires_in: int = SESSION_SECONDS
-    student: StudentResponse
+    expires_at: datetime
+    student: StudentAccount
 
 
-def create_session(connection: psycopg.Connection, student: dict) -> StudentLoginResponse:
-    token = secrets.token_urlsafe(32)
-    connection.execute("DELETE FROM student_sessions WHERE expires_at <= CURRENT_TIMESTAMP")
-    connection.execute("""INSERT INTO student_sessions (token_hash, student_id, student_updated_at, expires_at)
-        VALUES (%s, %s, %s, %s)""", (
-        hashlib.sha256(token.encode()).hexdigest(), student["id"], student["updated_at"],
-        datetime.now(timezone.utc) + timedelta(seconds=SESSION_SECONDS),
-    ))
-    return StudentLoginResponse(access_token=token, student=StudentResponse(**student))
-
-
-def require_student(credentials: Credentials, response: Response) -> StudentResponse:
-    token_hash = session_hash(credentials)
-    with connect_database() as connection:
-        with connection.cursor(row_factory=dict_row) as cursor:
-            student = cursor.execute(f"""SELECT {STUDENT_COLUMNS} FROM students
-                WHERE EXISTS (SELECT 1 FROM student_sessions
-                    WHERE student_sessions.student_id=students.id AND token_hash=%s
-                    AND expires_at > CURRENT_TIMESTAMP AND student_updated_at=students.updated_at)""",
-                (token_hash,),
-            ).fetchone()
-    if student is None:
+def require_student(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]):
+    if credentials is None or len(credentials.credentials) != 43:
         raise unauthorized()
-    response.headers["Cache-Control"] = "no-store"
-    return StudentResponse(**student)
-
-
-@router.post("/register", response_model=StudentLoginResponse, status_code=201)
-def register(payload: StudentCreate, request: Request, response: Response):
-    rate_limit(request, "register", 5)
-    response.headers["Cache-Control"] = "no-store"
-    try:
-        with connect_database() as connection:
-            admin_id = enrollment_admin(connection)
-            with connection.cursor(row_factory=dict_row) as cursor:
-                student = cursor.execute(f"""INSERT INTO students
-                    (admin_id, name, student_id, email, mobile, college, degree, stream, github_url, linkedin_url, password_hash)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING {STUDENT_COLUMNS}""",
-                    [admin_id, *payload.model_dump(exclude={"password"}).values(), password_hasher.hash(payload.password.get_secret_value())],
-                ).fetchone()
-            return create_session(connection, student)
-    except psycopg.errors.UniqueViolation:
-        raise HTTPException(409, "An account with this student ID or email already exists. Sign in or contact your administrator.") from None
-
-
-@router.post("/login", response_model=StudentLoginResponse)
-def login(payload: LoginRequest, request: Request, response: Response):
-    rate_limit(request, "login", 10)
-    response.headers["Cache-Control"] = "no-store"
-    try:
-        email = validate_email(payload.email.strip(), check_deliverability=False).normalized.lower()
-    except EmailNotValidError:
-        email = ""
     with connect_database() as connection:
-        admin_id = enrollment_admin(connection)
-        with connection.cursor(row_factory=dict_row) as cursor:
-            student = cursor.execute(f"SELECT {STUDENT_COLUMNS}, password_hash FROM students WHERE admin_id=%s AND email=%s FOR UPDATE",
-                (admin_id, email),
-            ).fetchone()
-        stored_hash = student["password_hash"] if student and student["password_hash"] else dummy_password_hash
+        student = connection.execute(
+            """SELECT students.* FROM student_sessions JOIN students ON students.id=student_sessions.student_id
+            WHERE token_hash=%s AND expires_at > clock_timestamp()
+            AND student_updated_at=students.updated_at AND students.is_active=TRUE AND students.deleted_at IS NULL""",
+            (token_digest(credentials.credentials),),
+        ).fetchone()
+    if student is None:
+        raise unauthorized("Invalid or expired session.")
+    return StudentAccount.model_validate(student)
+
+
+@router.post("/login", response_model=StudentLoginResult)
+def login(payload: LoginInput, request: Request, response: Response):
+    email = str(payload.email).strip().lower()
+    check_login_limit(request, email, "student:")
+    with connect_database() as connection:
+        student = connection.execute("SELECT * FROM students WHERE lower(email)=%s FOR UPDATE", (email,)).fetchone()
         try:
-            password_hasher.verify(stored_hash, payload.password.get_secret_value())
+            valid = password_hasher.verify(student["password_hash"] if student else dummy_password_hash, payload.password.get_secret_value())
         except (VerificationError, InvalidHashError):
-            raise unauthorized() from None
-        if student is None or not student["password_hash"]:
-            raise unauthorized()
-        del student["password_hash"]
-        return create_session(connection, student)
+            valid = False
+        if not valid or student is None or not student["is_active"] or student["deleted_at"] is not None:
+            raise unauthorized("Invalid email or password.")
+        connection.execute("DELETE FROM student_sessions WHERE expires_at <= clock_timestamp()")
+        token = secrets.token_urlsafe(32)
+        session = connection.execute(
+            """INSERT INTO student_sessions (token_hash, student_id, student_updated_at, expires_at)
+            VALUES (%s, %s, %s, clock_timestamp() + interval '8 hours') RETURNING expires_at""",
+            (token_digest(token), student["id"], student["updated_at"]),
+        ).fetchone()
+    response.headers.update(PRIVATE_HEADERS)
+    return StudentLoginResult(access_token=token, expires_at=session["expires_at"], student=StudentAccount.model_validate(student))
 
 
-@router.get("/me", response_model=StudentResponse)
-def current_student(student: Annotated[StudentResponse, Depends(require_student)]):
+@router.get("/me", response_model=StudentAccount)
+def me(student: Annotated[StudentAccount, Depends(require_student)], response: Response):
+    response.headers.update(PRIVATE_HEADERS)
     return student
 
 
-@router.get("/progress")
-def current_progress(student: Annotated[StudentResponse, Depends(require_student)]):
+@router.put("/password", status_code=204)
+def change_password(payload: PasswordChangeInput, request: Request,
+                    student: Annotated[StudentAccount, Depends(require_student)],
+                    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]):
+    if credentials is None:
+        raise unauthorized()
+    check_login_limit(request, student.email, "student:")
+    new_password = payload.new_password.get_secret_value()
+    if new_password != payload.confirm_password.get_secret_value():
+        raise HTTPException(422, "New passwords do not match.", headers=PRIVATE_HEADERS)
+    if new_password == payload.current_password.get_secret_value():
+        raise HTTPException(422, "Choose a different new password.", headers=PRIVATE_HEADERS)
     with connect_database() as connection:
-        return {"weeks": read_week_progress(connection, student.id)}
+        record = connection.execute(
+            """SELECT * FROM students WHERE id=%s FOR UPDATE""", (student.id,),
+        ).fetchone()
+        session = connection.execute(
+            """SELECT 1 FROM student_sessions WHERE student_id=%s AND token_hash=%s
+            AND expires_at > clock_timestamp() AND student_updated_at=%s""",
+            (student.id, token_digest(credentials.credentials), record["updated_at"] if record else None),
+        ).fetchone()
+        if record is None or session is None or not record["is_active"] or record["deleted_at"] is not None:
+            raise unauthorized()
+        try:
+            valid = password_hasher.verify(record["password_hash"], payload.current_password.get_secret_value())
+        except (VerificationError, InvalidHashError):
+            valid = False
+        if not valid:
+            raise HTTPException(400, "Current password is incorrect.", headers=PRIVATE_HEADERS)
+        connection.execute("UPDATE students SET password_hash=%s WHERE id=%s", (password_hasher.hash(new_password), student.id))
+        connection.execute("DELETE FROM student_sessions WHERE student_id=%s", (student.id,))
+    return Response(status_code=204, headers=PRIVATE_HEADERS)
 
 
 @router.post("/logout", status_code=204)
-def logout(credentials: Credentials):
-    token_hash = session_hash(credentials)
+def logout(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]):
+    if credentials is None or len(credentials.credentials) != 43:
+        raise unauthorized()
     with connect_database() as connection:
-        connection.execute("DELETE FROM student_sessions WHERE token_hash=%s", (token_hash,))
-    return Response(status_code=204, headers={"Cache-Control": "no-store"})
+        connection.execute("DELETE FROM student_sessions WHERE token_hash=%s", (token_digest(credentials.credentials),))
+    return Response(status_code=204, headers=PRIVATE_HEADERS)

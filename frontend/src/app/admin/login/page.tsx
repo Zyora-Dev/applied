@@ -1,9 +1,11 @@
-import { redirect } from "next/navigation";
-import { AuthShell } from "@/components/auth-shell";
-import { LoginForm } from "@/components/login-form";
-import { getAdmin } from "@/lib/admin-session";
+import type { Metadata } from "next";
+import { AdminLogin } from "@/components/admin-login";
 
-export default async function LoginPage() {
-  if (await getAdmin()) redirect("/admin");
-  return <AuthShell><LoginForm /></AuthShell>;
+export const metadata: Metadata = {
+  title: "Admin sign in | Applied AI",
+  robots: { index: false, follow: false },
+};
+
+export default function LoginPage() {
+  return <AdminLogin />;
 }
